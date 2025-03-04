@@ -1,72 +1,59 @@
-#include <algorithm>
 #include <bits/stdc++.h>
 
 using namespace std;
 
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
-#define dbg(a) cout << #a << " = " << a << endl;
-#define pb push_back
-#define f first
-#define s second
-typedef unsigned ui;
+#define ge first
+#define ti second
 typedef long long ll;
 typedef unsigned long long ull;
-typedef vector<int> vi;
-typedef vector<bool> vb;
-typedef vector<ll> vll;
-typedef vector<string> vs;
-typedef vector<vector<int>> vvi;
-typedef pair<int,int> pii;
-typedef map<int,int> mii;
-typedef set<int> si;
+
+struct G {
+    ll t;
+    ll m;
+    bool c;
+    ll i;
+
+    bool operator<(G o) {
+        return t<o.t;
+    }
+};
 
 int main() { _
-    int n,x;
+    ll n;
     cin >> n;
     
-    vi dur(n+1);
-    vb apertou(n+1);
-    map<int,int> tempo;
-
-    bool b;
-    for(int i=1;i<=n;i++) {
-        cin >> x >> dur[i] >> b;
-        apertou[i] = b;
-        tempo.insert({x,i});
+    vector<G> v(n);
+    vector<ll> sad;
+    ll cnt=1;
+    for(auto &i:v) {
+        cin >> i.t >> i.m >> i.c;
+        i.i = cnt++;
     }
 
-    vi sad;
-    deque<pii> pl;
+    sort(v.begin(),v.end());
+    ll tf;
 
-    for(int i=1;tempo.size();i++) {
-        b=false;
-        if(pl.size()) {
-            pl.front().f--;
-            if(pl.front().f==0) {
-                pl.pop_front();
-                b = true;
-            }
+    deque<pair<ll,ll>> q;
+
+    for(auto const &i:v) {
+        while(q.size() and q.front().ti<=i.t-tf) {
+            tf+=q.front().ti;
+            q.pop_front();
         }
 
-        if(tempo.count(i)) { // alguem entrou na fila
-            int id = tempo.at(i);
-            if(not b) { // ngm foi removido
-                if(pl.size() and apertou[id]) { // se tem alguem na fila e a pessoa furou
-                    sad.push_back(pl.front().s); // quem ta na fila fica triste
-                    pl.pop_front(); // perde a musica
-                    pl.push_front({dur[id],id}); // e a nova pessoa entra na frente
-                } else pl.push_back({dur[id],id}); // tá vazia ou não furou (talvez ambos)
-            } else { // removeu alguem
-                if(apertou[id]) pl.push_front({dur[id],id});
-                else pl.push_back({dur[id],id});
-            }
-            tempo.erase(i);
-        }
+        if(q.empty()) tf=i.t;
+        if(q.size() and i.c) {
+            sad.push_back(q.front().ge);
+            q.pop_front();
+            q.push_front({i.i,i.m});
+            tf=i.t;
+        } else q.push_back(make_pair(i.i,i.m));
     }
 
     cout << sad.size() << '\n';
-    for(int i:sad) cout << i   << ' ';
-    if(sad.size()) cout << '\n';
+    for(auto i:sad) cout << i << ' ';
+    cout << '\n';
 
     return 0;
 }
