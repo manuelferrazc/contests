@@ -39,7 +39,13 @@ void solve() {
     } else if(qtd-ft+fc==opt) qt++;
 
     fc = (v[1]-1)/d+((v[1]-1)%d!=0);
-    ft = 1+(v[1]-v[0]-1)/d+(v[0]-1)/d+
+    ft = 1+(v[1]-v[0]-1)/d+(v[0]-1)/d+((v[0]-1)%d!=0);
+    if(qtd-ft+fc<opt) {
+        opt = qtd-ft+fc;
+        qt=1;
+    } else if(qtd-ft+fc==opt) qt++;
+
+    cout << opt << ' ' << qt << '\n';
 }
 
 int main() { _
