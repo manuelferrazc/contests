@@ -17,46 +17,28 @@ void solve() {
         return;
     }
 
-    // bool cx=false,xy=false;
     for(ll i=0;i<40;i++) {
-        // if(cx) {
-        //     cx=false;
-        //     x+=(1LL<<i);
-        // }def f(x,y,k): return (x+y+2*k)==((x+k)^(y+k))
-        // if(cy) {
-        //     cy=false;
-        //     y+=(1LL<<i);
-        // }
-
         if(((x>>i)&1LL) and ((y>>i)&1LL)) {
-            for(;i<60;i++) {
-                ll xi = ((x>>i)&1LL);//, xi1 = ((x>>(i+1))&1LL);
-                ll yi = ((y>>i)&1LL);//, yi1 = ((y>>(i+1))&1LL);
-                if(yi==xi) {
-                    a|=1LL<<i;
-                } else {
-                    a|=1LL<<i;
-                    if(xi) {
-                        int j;
-                        for(j=i+1;((x>>j)&1LL);j++) 
-                        x|=1LL<<j;
-                    } else {
-                        int j;
-                        for(j=i+1;((y>>j)&1LL);j++) 
-                        y|=1LL<<j;
-                    }
-                    break;
+            for(;;i++) {
+                if(i>=50LL) {
+                    cout << "-1\n";
+                    return;
                 }
+                ll xi = ((x>>i)&1LL), xi1 = ((x>>(i+1LL))&1LL);
+                ll yi = ((y>>i)&1LL), yi1 = ((y>>(i+1LL))&1LL);
+                
+                a|=1LL<<i;
+                if((xi>yi and yi1>xi1) or (xi<yi and yi1<xi1)) break;
 
             }
-            // // cout << "ababa\n";
-            // a+=1LL<<i;
-            // if((x>>i)&1LL) x+=1LL<<i;
-            // if((y>>i)&1LL) y+=1LL<<i;
+        }
+        if ((x+y+a+a)==((x+a)^(y+a))) {
+            cout << a << '\n';
+            return;
         }
     }
-
-    cout << a << '\n';
+    if ((x+y+a+a)==((x+a)^(y+a))) cout << a << '\n';
+    else cout << "-1\n";
 }
 
 int main() { _
