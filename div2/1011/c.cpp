@@ -9,36 +9,11 @@ typedef long long ll;
 typedef unsigned long long ull;
 
 void solve() {
-    ll x,y,a=0;
+    ll x,y;
     cin >> x >> y;
 
-    if(x==y) {
-        cout << "-1\n";
-        return;
-    }
-
-    for(ll i=0;i<40;i++) {
-        if(((x>>i)&1LL) and ((y>>i)&1LL)) {
-            for(;;i++) {
-                if(i>=50LL) {
-                    cout << "-1\n";
-                    return;
-                }
-                ll xi = ((x>>i)&1LL), xi1 = ((x>>(i+1LL))&1LL);
-                ll yi = ((y>>i)&1LL), yi1 = ((y>>(i+1LL))&1LL);
-                
-                a|=1LL<<i;
-                if((xi>yi and yi1>xi1) or (xi<yi and yi1<xi1)) break;
-
-            }
-        }
-        if ((x+y+a+a)==((x+a)^(y+a))) {
-            cout << a << '\n';
-            return;
-        }
-    }
-    if ((x+y+a+a)==((x+a)^(y+a))) cout << a << '\n';
-    else cout << "-1\n";
+    if(x==y) cout << -1 << '\n';
+    else cout << (1LL<<50)-max(x,y) << '\n';
 }
 
 int main() { _
