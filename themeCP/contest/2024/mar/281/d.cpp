@@ -8,25 +8,55 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+bool t(string &s,int n, int k) {
+    set<int> dis;
+    for(int i=n-1,kk=k;i>=0 and kk;i--) {
+        if(s[i]=='1') {
+            kk--;
+            dis.insert(i+1);
+        }
+    }
+    if(dis.size()<k) return false;
+    vector<int> ndis;
+    for(int i=1;i<=n;i++) if(not dis.count(i)) ndis.push_back(i);
+
+    for(auto i = dis.rbegin();i!=dis.rend();i++) {
+        while(ndis.size() and ndis.back()>*i) ndis.pop_back();
+
+        if(ndis.empty()) return false;
+        ndis.pop_back();
+    }
+
+    return true;
+}
+
 void solve() {
     int n;
     string s;
     cin >> n >> s;
 
-    ll cost=0;
-    for(int i=n-1;i>=0;i--) {
-        if(i==0) {cout << "1 ";cost+=i+1;}
-        if(i and s[i-1]=='1') s[i-1] = '0';
-        i--;
-        for(;i>=0 and s[i]=='0';i--) {cost+=i+1;cout << i+1 << ' ';}
-        if(i<0) break;
-        i++;
+    ll cost=((1LL+n)*n)>>1;
+    
+    int l=0,r=n,ans=0;
+    while(l<=r) {
+        int m = (l+r)>>1;
+        if(t(s,n,m)) {
+            ans = m;
+            l=m+1;
+        } else r=m-1;
+    }
+
+    for(int i=n-1;ans;i--) {
+        if(s[i]=='1') {
+            cost-=i+1;
+            ans--;
+        }
     }
     
     cout << cost << '\n';
 }
 
-int main() { _
+int main() { 
     int t;
     cin >> t;
     while(t--) solve();
