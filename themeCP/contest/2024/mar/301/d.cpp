@@ -8,30 +8,37 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-vector<int> v;
-vector<pair<int,int>> st;
-vector<int> lazy;
-
-void build(int pos, int l, int r) {
-    if(l==r) st[pos] = make_pair(v[l],v[l]);
-    else {
-        int m = (l+r)>>1, ls = 2*pos+1;
-        build(ls,l,m);
-        build(ls+1,m+1,r);
-        st[pos] = max(st[ls],st[ls+1]);
-    }
-}
-
 void solve() {
     int n;
     cin >> n;
-    v.resize(n);
-    for(int &i:v) cin >> i;
+    multiset<int> s;
+    for(int i=0;i<n;i++) {
+        int a;
+        cin >> a;
+        s.insert(a);
+    }
 
-    st.resize(n<<2);
-    lazy.assign(n<<2,0);
-    build(0,0,n-1);
+    int o=0, act=*s.rbegin();
+    for(auto it = s.begin();it!=s.end();it++) o|=*it;
+    s.erase(prev(s.end()));
+    cout << act << ' ';
+    
+    while(o!=act) {
+        int m=-1,x=0;
 
+        for(int i:s) {
+            if((act|i)>m) {
+                m=act|i;
+                x=i;
+            }
+        }
+
+        act = act|x;
+        cout << x << ' ';
+        s.erase(s.lower_bound(x));
+    }
+    for(int i:s) cout << i << ' ';
+    cout << '\n';
 }
 
 int main() { _
