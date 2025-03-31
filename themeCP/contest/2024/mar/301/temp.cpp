@@ -9,12 +9,7 @@ typedef long long ll;
 typedef unsigned long long ull;
 
 void solve() {
-    int n;
-    cin >> n;
-    vector<int> v(n);
-    for(int &i:v) cin >> i;
-    sort(v.begin(),v.end());
-    cout << v.back()-v.front() << '\n';
+    
 }
 
 int main() { _
