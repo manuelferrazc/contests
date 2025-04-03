@@ -11,36 +11,29 @@ typedef unsigned long long ull;
 void solve() {
     int n;
     cin >> n;
-    vector<ll> c(n);
+    vector<ll> c(n),r(n);
 
-    multiset<ll> l,r;
+    multiset<ll> l;
     ll ans=0;
     for(int i=0;i<n;i++) {
         cin >> ans;
         l.insert(ans);
     }
-    for(int i=0;i<n;i++) {
-        cin >> ans;
-        r.insert(ans);
-    }
+    for(ll &i:r) cin >> i;
     for(ll &i:c) cin >> i;
-
-    vector<pair<ll,ll>> v(n);
-    multimap<ll,pair<int,int>> m;
+    sort(r.begin(),r.end());
+    vector<ll> v(n);
     for(int i=0;i<n;i++) {
-        auto a = l.begin(), b = r.begin();
-        m.insert({*b-*a,make_pair(*a,*b)});
+        auto a = l.upper_bound(r[i]);
+        a--;
+        v[i] = r[i]-*a;
         l.erase(a);
-        r.erase(b);
     }
-
+    
+    sort(v.begin(),v.end());
     sort(c.rbegin(),c.rend());
     ans=0;
-    for(int i=0;i<n;i++) {
-        auto it = m.begin();
-        ans+=c[i]*(it->ff);
-        m.erase(it);
-    }
+    for(int i=0;i<n;i++) ans+=c[i]*v[i];
 
     cout << ans << '\n';
 }
