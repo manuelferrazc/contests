@@ -9,7 +9,26 @@ typedef long long ll;
 typedef unsigned long long ull;
 
 void solve() {
-    
+    int n;
+    cin >> n;
+    vector<int[2]> dp(n);
+    vector<int> v(n);
+    for(int &i:v) cin >> i;
+    dp.back()[0] = 1;
+    dp.back()[1] = 2;
+
+    for(int i=n-2;i>=0;i--) {
+        if(v[i]==1) {
+            dp[i][0] = dp[i+1][1];
+            dp[i][1] = dp[i+1][0];
+        } else {
+            dp[i][0] = 1;
+            dp[i][1] = 2;
+        }
+    }
+
+    if(dp[0][0]==1) cout << "First\n";
+    else cout << "Second\n";
 }
 
 int main() { _
