@@ -13,8 +13,28 @@ void solve() {
 }
 
 int main() { _
-    int t;
-    cin >> t;
-    while(t--) solve();
+    int n;
+    cin >> n;
+    vector<string> v(n);
+    for(string &s:v) cin >> s;
+
+    bool ok=false;
+    for(int i=0;i<n;i++) {
+        if(v[i][0]==v[i][1] and v[i][1]=='O') {
+            v[i][0] = v[i][1] = '+';
+            ok=true;
+            break;
+        }
+        if(v[i][3]==v[i][4] and v[i][4]=='O') {
+            v[i][3] = v[i][4] = '+';
+            ok=true;
+            break;
+        }
+    }
+
+    if(ok) {
+        cout << "YES\n";
+        for(string &s:v) cout << s << '\n';
+    } else cout << "NO\n";
     return 0;
 }
