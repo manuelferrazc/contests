@@ -10,15 +10,11 @@ typedef unsigned long long ull;
 
 string s;
 
-void solve1(vector<int> &v) {
-    for(ull i=0;i<s.size();i++) if(s[i]=='1') v.push_back(i+1);
-}
-
-void solve2(vector<int> &v) {
+void solve(vector<int> &v) {
     for(ull i=0;i<s.size();i++) {
         if(s[i]=='0') continue;
-        ll j;
-        for(j=i;j<s.size();j++) {
+        ll j=i;
+        if(i!=s.size()-1 and s[i+1]=='1') for(;j<s.size();j++) {
             if(s[j]=='0' and s[j-1]=='0') {
                 j-=2;
                 break;
@@ -38,7 +34,7 @@ void solve2(vector<int> &v) {
         } else {
             v.push_back(j+2);
             v.push_back(-i-1);
-            for(ll sla = i+1;sla<j;sla++) {
+            for(ll sla = i;sla<=j;sla++) {
                 if(s[sla]=='0') v.push_back(-sla-1);
             }
             i=j;
@@ -46,35 +42,17 @@ void solve2(vector<int> &v) {
     }
 }
 
-void print(vector<int> &v) {
+int main() { _
+    cin >> s;
+    reverse(s.begin(),s.end());
+    vector<int> v;
+    solve(v);
+
     cout << v.size() << '\n';
     for(int i:v) {
         if(i>=0) cout << "+2^" << i-1 << '\n';
         else cout << "-2^" << abs(i+1) << '\n';
     }
-}
-
-int main() { _
-    cin >> s;
-    bool sla = true;
-    for(ull i=1;i<s.size();i++) {
-        if(s[i]=='1') {
-            sla = false;
-            break;
-        }
-    }
-    if(sla) {
-        cout << "1\n+2^" << s.size()-1 << '\n';
-        return 0;
-    }
-    reverse(s.begin(),s.end());
-
-    vector<int> v1,v2;
-    solve1(v1);
-    solve2(v2);
-
-    if(v1.size()<=v2.size()) print(v1);
-    else print(v2);
 
     return 0;
 }
