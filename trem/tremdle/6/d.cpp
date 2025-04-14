@@ -8,76 +8,84 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-int n;
-vector<int> v,dp;
+int calc(vector<int> &v) {
+    if(v.empty()) return 0;
+    if(*max_element(v.begin(),v.end())==0 and *min_element(v.begin(),v.end())==0) return 0;
+    if(v.size()==1ULL) return 1;
 
-void sum(int i, int j, int q) {
-    while(i<=j) v[i++]+=q;
-}
-
-int d(int mask) {
-    if(mask==0) return 0;
-    if(dp[mask]!=INT_MAX) return dp[mask];
     
-    int m = mask,i=0;
-    for(;;i++) if(mask&(1<<i)) break;
-    int s=i;//,vv=v[i];
-
-    for(;mask&(1<<i) and i<n;i++) {
-        if(v[i]==v[s]) m&=~(1<<i);
-        dp[mask] = min(dp[mask],1+d(m));
-    }
-    // cout << mask << ' ' << dp[mask] << '\n';
-    return dp[mask];
-}
-
-int main() { _
-    cin >> n;
-    v.resize(n);
-    dp.assign(1<<n,INT_MAX);
-    for(int &i:v) cin >> i;
-    int mm = *min_element(v.begin(),v.end());
-    if(*max_element(v.begin(),v.end())==0) {
-        cout << "0\n";
-        return 0;
-    }
-    for(int &i:v) i-=mm;
-    
-    int ans=(mm>0);
-    for(int i=0;i<n;i++) {
-        if(v[i]) {
-            if(i==n-1) {
-                ans++;
-                break;
-            } else if(v[i]==v[i+1]) continue;
-            int init=0;
-            for(;i<n;i++) {
-                if(v[i]==0) {
-                    ans+=d(init);
-                    break;
-                }
-                if(i<n-1 and v[i]==v[i+1]) {
-                    init|=1<<i;
-                    ans+=d(init);
-                    while(i<n-1 and v[i]==v[i+1]) i++;
-                    break;
-                } else if(i and i<n-1 and v[i-1]+v[i+1]==v[i]) {
-                    // init|=1<<i;
-                    ans+=d(init);
-                    break;
-                } else if(i==n-1) {
-                    init|=1<<i;
-                    ans+=d(init);
-                    break;
-                }
-                init|=1<<i;
-            }
+    int r=1,r2=1, m = v[0];
+    for(int &i:v) i-=m;
+    // for(int i:v) cout << i << ' ';
+    // cout << '\n';
+    vector<int> aux;
+    for(int i:v) {
+        if(i) aux.push_back(i);
+        else {
+            // cout << '\n';
+            if(aux.size()) r+=calc(aux);
+            aux.clear();
         }
     }
-    // for(int i:v) cout << i << ' ';
-    cout << ans << '\n';
-    // for(int i=0;i<dp.size();i++) {
-        // cout << i << ' ' << dp[i] << '\n';
-    // }
+    if(aux.size()) r+=calc(aux);
+
+    for(int &i:v) i+=m;
+    m = v.back();
+    for(int &i:v) i-=m;
+
+    aux.clear();
+    for(int i:v) {
+        if(i) aux.push_back(i);
+        else {
+            // cout << '\n';
+            if(aux.size()) r2+=calc(aux);
+            aux.clear();
+        }
+    }
+
+    if(aux.size())r2+=calc(aux);
+
+    return min(r,r2);
+}
+
+int main() {
+    int n, ans=0;
+    cin >> n;
+    set<int> s;
+    for(int i=0;i<n;i++) {
+        int a;
+        cin >> a;
+        if(s.count(a)) ans++;
+        s.insert(a);
+    }
+    vector<int> v;
+
+    for(int i=0;i<n;i++) {
+        int a;
+        cin >> a;
+        if(a) v.push_back(a);
+        else {
+            vector<int> v2;
+            for(ull j=0;j<v.size();j++) {
+                if(j>0 and j<v.size()-1 and v[j]==v[j-1]+v[j+1]) {
+                    ans+=calc(v2);
+                    v2.clear();
+                } else v2.push_back(v[j]);
+            }
+            ans+=calc(v2);
+            v.clear();
+        }
+    }
+    vector<int> v2;
+    for(ull i=0;i<v.size();i++) {
+        if(i>0 and i<v.size()-1 and v[i]==v[i-1]+v[i+1]) {
+            ans+=calc(v2);
+            v2.clear();
+        } else v2.push_back(v[i]);
+    }
+    ans+=calc(v2);
+    v.clear();
+
+    // só queria ganhar o leite :(
     return 0;
 }
