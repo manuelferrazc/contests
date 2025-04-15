@@ -33,12 +33,25 @@ int main() { _
     }
     sort(v.begin(),v.end());
 
-    int ans=0;
-    auto it = max_element(vc.begin(),vc.end()), it2 = max_element(vl.begin(),vl.end());
+    int maxc = *max_element(vc.begin(),vc.end()), maxl = *max_element(vl.begin(),vl.end());
 
-    auto lb = lower_bound(v.begin(),v.end(),make_pair((int)(it2-vl.begin()),int(it-vc.begin())));
-    if(lb==v.end() or *lb!=make_pair((int)(it2-vl.begin()),(int)(it-vc.begin()))) ans=max(ans,(int)(*it+*it2));
-    else ans = max(ans,*it+*it2-1);
-    cout << ans << '\n';
+    vector<int> mc,ml;
+    for(int i=0;i<n;i++) if(vl[i]==maxl) ml.push_back(i);
+    for(int i=0;i<m;i++) if(vc[i]==maxc) mc.push_back(i);
+
+    for(int x:ml) {
+        for(int y:mc) {
+            pair<int,int> p;
+            p.ff=x;
+            p.ss=y;
+            auto it = lower_bound(v.begin(),v.end(),p);
+            if(it==v.end() or *it!=p) {
+                cout << maxl + maxc << '\n';
+                return 0;
+            }
+        }
+    }
+
+    cout << maxl+maxc-1 << '\n';
     return 0;
 }
