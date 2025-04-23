@@ -64,29 +64,33 @@ ld polarea(vector<pt> v) { // area do poligono
 int main() { _
     ll n;
     cin >> n;
-    vector<pt> v(n);
-    for(auto &i:v) cin >> i.x >> i.y;
+    vector<pair<pt,int>> v(n);
+    int a0=1;
+    for(auto &i:v) {
+        cin >> i.x.x >> i.x.y;
+        i.y = a0++;
+    }
 
-    // sort(v.begin(),v.end());
+    sort(v.begin(),v.end());
 
     ll x;
     for(ll i=2;i<n;i++) {
-        if(not col(v[0],v[1],v[i])) {
+        if(not col(v[0].x,v[1].x,v[i].x)) {
             x=i;
             break;
         }
     }
 
-    double a = polarea({v[0],v[1],v[x]});
+    double a = polarea({v[0].x,v[1].x,v[x].x});
     for(ll i=x+1;i<n;i++) {
-        if(col(v[0],v[1],v[i])) continue;
-        double ar = polarea({v[0],v[1],v[i]});
+        if(col(v[0].x,v[1].x,v[i].x)) continue;
+        double ar = polarea({v[0].x,v[1].x,v[i].x});
         if(ar<a) {
             a=ar;
             x=i;
         }
     }
 
-    cout << "1 2 " << x+1 << '\n';
+    cout << v[0].y << ' ' << v[1].y << ' ' << v[x].y << '\n';
     return 0;
 }
