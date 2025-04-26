@@ -14,7 +14,7 @@ vector<map<int,pair<ll,vector<int>>>> dp;
 
 void dfs(int v=0) {
     if(dp[v].size()) return;
-
+    // cout << "ababa\n";
     for(auto [u,w] : adj[v]) {
         dfs(u);
         for(auto &sla:dp[u]) {
@@ -31,13 +31,14 @@ void dfs(int v=0) {
             }
         }
     }
+    // cout << v << ' ' << dp[v].size() << '\n';
 }
 
-int main() { _
+int main() { 
     cin >> n >> m >> t;
     adj.resize(n);
     dp.resize(n);
-    dp.back().insert(make_pair(0,make_pair(1,vector<int>(1,n-1))));
+    dp.back().insert(make_pair(1,make_pair(0,vector<int>(1,n-1))));
 
     for(int i=0;i<m;i++) {
         int a,b;
@@ -48,9 +49,9 @@ int main() { _
 
     dfs();
 
-    auto it = dp[0].rbegin();
+    auto it = prev(dp[0].end());
     cout << it->ff << '\n';
-    for(auto it2 = it->ss.ss.rbegin();it2!=it->ss.ss.rend();it2++) cout << *it2 << ' ';
+    for(auto it2 = it->ss.ss.rbegin();it2!=it->ss.ss.rend();it2++) cout << (*it2)+1 << ' ';
     cout << '\n';
 
     return 0;
