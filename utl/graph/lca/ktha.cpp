@@ -14,7 +14,6 @@ int l=0;
 
 void dfs(int v, int p=-1) {
     if(p!=-1) d[v] = d[p]+1;
-    
     ka[v][0] = p;
 
     for(int i=1;i<l;i++) {
@@ -56,27 +55,27 @@ void solve() {
     
     d[r] = 0;
     dfs(r);
-
     cin >> q;
 
     int a,b,op;
     while(q--) {
         cin >> op >> a;
         a--;
-        if(op==1) continue;
-        else if(op==0) {
+
+        if(op==0) {
             cin >> b;
             b--;
-            d[a] = d[b]+1;
-            ka[a].assign(l,-1);
-            ka[a][0] = b;
+            d[b] = d[a]+1;
+            ka[b].assign(l,-1);
+            ka[b][0] = a;
 
             for(int i=1;i<l;i++) {
-                if(ka[a][i-1]!=-1) ka[a][i] = ka[ ka[a][i-1] ][i-1];
+                if(ka[b][i-1]!=-1) ka[b][i] = ka[ ka[b][i-1] ][i-1];
             }
-        } else {
+        } else if(op==1) d[a] = -1;
+        else {
             cin >> b;
-            if(d[a]<b) cout << 0 << '\n';
+            if(d[a]<b) cout << /* a << ' ' << b << ' ' << d[a] << ' ' */ 0 << '\n';
             else cout << getKA(a,b)+1 << '\n';
         }
     }
