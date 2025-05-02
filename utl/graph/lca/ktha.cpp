@@ -31,14 +31,24 @@ int getKA(int a, int k) {
     return a;
 }
 
+void dfsr(int v, int p) {
+    if(d[v]==-1) return;
+    for(int i:adj[v]) {
+        if(i==p) continue;
+        dfsr(i,v);
+    }
+    d[v] = -1;
+}
+
 void solve() { 
     int n,q;
     cin >> n;
     
+    l=0;
     for(int i=0;i<30;i++) if(n&(1<<i)) l=i+1;
-    adj.resize(100000,{});
-    ka.resize(100000,vector<int>(l,-1));
-    d.resize(100000,-1);
+    adj.assign(200000,vector<int>());
+    ka.assign(200000,vector<int>(l,-1));
+    d.assign(200000,-1);
 
     int r;
     for(int i=0;i<n;i++) {
@@ -64,6 +74,7 @@ void solve() {
 
         if(op==0) {
             cin >> b;
+            if(d[a]==-1) continue;
             b--;
             d[b] = d[a]+1;
             ka[b].assign(l,-1);
@@ -72,7 +83,8 @@ void solve() {
             for(int i=1;i<l;i++) {
                 if(ka[b][i-1]!=-1) ka[b][i] = ka[ ka[b][i-1] ][i-1];
             }
-        } else if(op==1) d[a] = -1;
+        }
+        else if(op==1) d[a] = -1;
         else {
             cin >> b;
             if(d[a]<b) cout << /* a << ' ' << b << ' ' << d[a] << ' ' */ 0 << '\n';
@@ -81,7 +93,7 @@ void solve() {
     }
 }
 
-int main() {_
+int main() { _
     int t;
     cin >> t;
     while(t--) solve();
