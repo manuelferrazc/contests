@@ -35,7 +35,6 @@ int main() {
 
     int l=0;
     for(int i=0;i<30;i++) if(n&(1<<i)) l=i+1;
-    l++;
 
     vector<int> p(n);
     vector<vector<int>> ka(n,vector<int>(l,-1));

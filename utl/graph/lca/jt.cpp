@@ -58,7 +58,6 @@ int main() { _
     for(int nettinho = 1;nettinho<n;nettinho++) {
         int a, b;
         cin >> a >> b;
-        a--;b--;
         adj[a].push_back(b);
         adj[b].push_back(a);
     }
@@ -68,14 +67,24 @@ int main() { _
     dfs(0);
 
     while(q--) {
-        int a,b;
-        cin >> a >> b;
-        a--;
-        b--;
-        if(d[a]>d[b]) swap(a,b);
+        int a,b,c;
+        cin >> a >> b >> c;
+
         int anc = getLCA(a,b);
-        if(anc==a) cout << d[b]-d[a] << '\n';
-        else cout << d[b]+d[a]-2*d[anc] << '\n';
+        if(anc==a) {
+            if(d[b]-d[a]<c) cout << -1 << '\n';
+            else cout << getKA(b,d[b]-d[a]-c) << '\n';
+        } else if(anc==b) {
+            if(d[a]-d[b]<c) cout << -1 << '\n';
+            else cout << getKA(a,c) << '\n';
+        } else {
+            if(d[a]-d[anc]>=c) cout << getKA(a,c) << '\n';
+            else {
+                c-=d[a]-d[anc];
+                if(d[b]-d[anc]>=c) cout << getKA(b,d[b]-d[anc]-c) << '\n';
+                else cout << -1 << '\n';
+            }
+        }
     }
 
     return 0;
