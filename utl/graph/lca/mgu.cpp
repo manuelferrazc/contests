@@ -50,16 +50,45 @@ int calc(int a, int b, int f) {
     int ab = getLCA(a,b), fa = getLCA(a,f), fb = getLCA(b,f);
     int com = getLCA(ab,f);
 
-    if(com==ab and ((fa==f) != (fb==f))) return 1;
-    if(ab==a and fb==b) return 1+d[f]-d[b];
-    if(ab==b and fa==a) return 1+d[f]-d[a];
-    if(fa==f and ab==a) return 1+d[a]-d[f];
-    if(fa==f and ab==b) return 1+d[b]-d[f];
-    if(com==ab) return d[f]-d[ab]+1;
-    if(fa==a and fb==b) return d[f] - max(d[a],d[b]) + 1;
-    if(fa==a) return d[f]-d[a]+1;
-    if(fb==b) return d[f]-d[b]+1;
-    else return d[ab]-2*d[com]+d[f]+1;
+    if(f==a or f==b) return 1;
+    if(a==b) return d[a]-2*d[com]+d[f]+1;
+    
+    if(com==f) return d[ab]-d[f]+1;
+    if(com==a) {
+        if(fb==f) return 1;
+        if(fb==b) return d[f]-d[b]+1;
+        // if(fb==a) return d[f]-d[a]+1;
+        return d[f]+1-d[fb];
+    }
+    if(com==b) {
+        if(fa==f) return 1;
+        if(fa==a) return d[f]-d[a]+1;
+        // if(fb==b) return d[f]-d[b]+1;
+        return d[f]+1-d[fa];
+    }
+    // tem um ancestral diferente
+    if(fa==f or fb==f) return 1;
+    if(fa==a) return 1+d[f]-d[a];
+    if(fb==b) return 1+d[f]-d[b];
+    return d[ab]-2*d[com]+d[f]+1;
+    // if(ab==f and ab!=a and ab!=b) return d[a]+d[b]-2*d[f]+1;
+    // if(fb==a) return d[b]+d[f]-2*d[a]+1;
+    // if(fa==b) return d[a]+d[f]-2*d[b]+1;
+    // if(com==f) {
+
+    // }
+    
+    
+    // if(com==ab and ((fa==f) != (fb==f))) return 1;
+    // if(ab==a and fb==b) return 1+d[f]-d[b];
+    // if(ab==b and fa==a) return 1+d[f]-d[a];
+    // if(fa==f and ab==a) return 1+d[a]-d[f];
+    // if(fa==f and ab==b) return 1+d[b]-d[f];
+    // if(com==ab) return d[f]-d[ab]+1;
+    // if(fa==a and fb==b) return d[f] - max(d[a],d[b]) + 1;
+    // if(fa==a) return d[f]-d[a]+1;
+    // if(fb==b) return d[f]-d[b]+1;
+    // else return d[ab]-2*d[com]+d[f]+1;
 }
 
 int main() { _
@@ -91,9 +120,9 @@ int main() { _
         c--;
 
         int ans = max({calc(a,b,c),calc(a,c,b),calc(b,c,a)});
-        // cout << a << b << c << ": " << calc(a,b,c) << '\n';
-        // cout << a << c << b << ": " << calc(a,c,b) << '\n';
-        // cout << b << c << a << ": " << calc(b,c,a) << '\n';
+        // cout << a+1 << b+1 << c+1 << ": " << calc(a,b,c) << '\n';
+        // cout << a+1 << c+1 << b+1 << ": " << calc(a,c,b) << '\n';
+        // cout << b+1 << c+1 << a+1 << ": " << calc(b,c,a) << '\n';
         cout << ans << '\n';
     }
 
