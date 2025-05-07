@@ -8,8 +8,8 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-const ll mod = 1'000'000'009LL;
-const ll p = 200003LL;
+const ll mod = 1'000'000'007LL;
+const ll p = 200'003;
 
 vector<ll> pot;
 
@@ -24,16 +24,16 @@ ll fexp(ll n, ll e) {
     return r;
 }
 
-ll invp;
+ll invp,invm;
 
-ll hash(vector<ll> &v, ll n) {
+ll hashh(vector<ll> &v, ll n) {
     ll r=0;
     for(ll i=0;i<n;i++) r = (r+v[i]*pot[i])%mod;
     return r;
 }
 
 ll sg(ll a1) {
-    return ((a1*pot.back()%mod)*p%mod)*invp%mod;
+    return ((a1*(pot.back()*p%mod-1+mod)%mod)*invp%mod);
 }
 
 int main() { _
@@ -44,7 +44,8 @@ int main() { _
         return 0;
     }
 
-    ll invp = fexp(p-1,mod-2);
+    invp = fexp(p-1,mod-2);
+    invm = fexp(p,mod-2);
 
     pot.push_back(1);
     for(ll i=1;i<w;i++) pot.push_back(pot.back()*p%mod);
@@ -53,7 +54,20 @@ int main() { _
     for(ll &i:a) cin >> i;
     for(ll &i:b) cin >> i;
 
-    ll hp = hash(b,w);
+    const ll hp = hashh(b,w);
+    ll ht = hashh(a,w);
+
+    ll sla = sg(a[0]-b[0]);
+
+    if(hp==((ht-sla+mod)%mod)) ans++;
+
+    for(ll i=0;i+w<n;i++) {
+        ht = (ht-a[i]+mod)%mod;
+        ht = ht*invm%mod;
+        ht = (ht+a[i+w]*pot.back())%mod;
+
+        if(hp==(ht-sg(a[i+1]-b[0])+mod)%mod) ans++;
+    }
 
     cout << ans << '\n';
 
