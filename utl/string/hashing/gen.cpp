@@ -3,7 +3,7 @@ using namespace std;
 
 int main(int argc, char**argv) {
     srand(atoi(argv[1]));
-    int n = 1 + rand()%1000;
+    int n = 1 + rand()%1500;
     vector<char> v;
     for(char c='a';c<='z';c++) v.push_back(c);
 
@@ -13,6 +13,6 @@ int main(int argc, char**argv) {
         if(rand()&1) cout << '1';
         else cout << '0';
     }
-    cout << '\n' << rand()%100 << '\n';
+    cout << '\n' << rand()%(n+1) << '\n';
     return 0;
 }
