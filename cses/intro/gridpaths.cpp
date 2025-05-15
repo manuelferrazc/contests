@@ -8,32 +8,37 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-string s;
-
-vector<vector<vector<ll>>> dp(7,vector<vector<ll>>(7,vector<ll>(48,-1)));
-vector<vector<bool>> vis(7,vector<bool>(7,false));
-
-ll brute(ll x, ll y, ll i=0) {
-    if(x<0 or y<0 or x>6 or y>6) return 0;
-    if(vis[x][y]) return 0;
-    if(i==48) return x==6 and y==0;
-    // if(dp[x][y][i]!=-1) return dp[x][y][i];
-    vis[x][y] = true;
-    ll r;
-    if(s[i]=='U') r =  /*dp[x][y][i] =*/ brute(x-1,y,i+1);
-    if(s[i]=='D') r =  /*dp[x][y][i] =*/ brute(x+1,y,i+1);
-    if(s[i]=='L') r =  /*dp[x][y][i] =*/ brute(x,y-1,i+1);
-    if(s[i]=='R') r =  /*dp[x][y][i] =*/ brute(x,y+1,i+1);
-    else r = 
-     /*dp[x][y][i] =*/ brute(x,y-1,i+1)+brute(x,y+1,i+1)+brute(x+1,y,i+1)+brute(x-1,y,i+1);
-    vis[x][y] = false;
-    return r;
-}
-
 int main() { _
+    string s;
     cin >> s;
+    
+    vector<vector<vector<ull>>> dp(7,vector<vector<ull>>(7,vector<ull>(48,0)));
+    if(s.back()=='D' or s.back()=='?') dp[5][6][47] = 1;
+    if(s.back()=='L' or s.back()=='?') dp[6][5][47] = 1;
 
-    cout << brute(0,0) << '\n';
+    for(int t = 46;t>=0;t--) {
+        for(int x=0;x<7;x++) {
+            for(int y=0;y<7;y++) {
+                if(s[t]=='U') {
+                    if(x) dp[x][y][t] = dp[x-1][y][t+1];
+                } else if(s[t]=='D') {
+                    if(x!=6) dp[x][y][t] = dp[x+1][y][t+1];
+                } else if(s[t]=='L') {
+                    if(y) dp[x][y][t] = dp[x][y-1][t+1];
+                } else if(s[t]=='R') {
+                    if(y!=6) dp[x][y][t] = dp[x][y+1][t+1];
+                } else {
+                    if(x) dp[x][y][t] += dp[x-1][y][t+1];
+                    if(x!=6) dp[x][y][t] += dp[x+1][y][t+1];
+                    if(y) dp[x][y][t] += dp[x][y-1][t+1];
+                    if(y!=6) dp[x][y][t] += dp[x][y+1][t+1];
+                }
+            }
+        }
+    }
+    
+
+    cout << dp[0][0][0] << '\n';
     
     return 0;
 }
