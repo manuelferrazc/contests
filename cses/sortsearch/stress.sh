@@ -1,4 +1,4 @@
-P=b
+P=nestedrangescound
 make ${P} ${P}2 gen || exit 1
 for ((i = 1; ; i++)) do
 	./gen $i > in
@@ -11,7 +11,7 @@ for ((i = 1; ; i++)) do
 		cat out
 		echo "--> saida2:"
 		cat out2
-		# break;
+		break;
 	fi
 	echo $i
 done
