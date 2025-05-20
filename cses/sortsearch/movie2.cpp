@@ -16,17 +16,28 @@ int main() { _
     for(auto &i:v) cin >> i.ff >> i.ss;
     sort(v.begin(),v.end());
 
-    priority_queue<int,vector<int>,greater<int>> pq;
-    for(int i=0;i<k;i++) {
+    multiset<int> s;
+    int i;
+    for(i=0;i<n and k>(int)s.size();i++) {
+        auto it = s.upper_bound(v[i].ff);
+        if(it!=s.begin()) {
+            ans++;
+            it--;
+            s.erase(it);
+            s.insert(v[i].ss);
+            continue;
+        }
         ans++;
-        pq.push(v[i].ss);
+        s.insert(v[i].ss);
     }
 
-    for(int i=k;i<n;i++) {
-        if(pq.top()<v[i].ff) {
+    for(;i<n;i++) {
+        auto it = s.upper_bound(v[i].ff);
+        if(it!=s.begin()) {
             ans++;
-            pq.pop();
-            pq.push(v[i].ss);
+            it--;
+            s.erase(it);
+            s.insert(v[i].ss);
         }
     }
 
