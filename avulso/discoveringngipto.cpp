@@ -19,8 +19,7 @@ bool eq(ld a, ld b) {
     return abs(a - b) <= eps;
 }
 
-namespace dd {
-
+namespace dd {// 2d (dois d)
     
     struct pt { // ponto
 	ld x, y;
@@ -78,18 +77,6 @@ bool isinseg(pt p, line r) { // se p pertence ao seg de r
 	return eq((a ^ b), 0) and (a * b) < eps;
 }
 
-ld get_t(pt v, line r) { // retorna t tal que t*v pertence a reta r
-	return (r.p^r.q) / ((r.p-r.q)^v);
-}
-
-bool interseg(line r, line s) { // se o seg de r intersecta o seg de s
-	// if (isinseg(r.p, s) or isinseg(r.q, s)
-    // or isinseg(s.p, r) or isinseg(s.q, r)) return 1;
-
-return ccw(r.p, r.q, s.p) != ccw(r.p, r.q, s.q) and
-ccw(s.p, s.q, r.p) != ccw(s.p, s.q, r.q);
-} // atencao aq
-
 // se o ponto ta dentro do poligono: retorna 0 se ta fora,
 // 1 se ta no interior e 2 se ta na borda
 int inpol(vector<pt>& v, pt p) { // O(n)
@@ -110,11 +97,22 @@ int inpol(vector<pt>& v, pt p) { // O(n)
 	return qt != 0;
 }
 
+bool interseg(line r, line s) { // se o seg de r intersecta o seg de s
+    if(col(r.p,r.q,s.p) or col(r.p,r.q,s.q) or col(s.p,s.q,r.p) or col(s.p,s.q,r.q)) return false;
+  	// acho que interseção de 1 ponto extremo (por exemplo, segmento (2,0),(2,2) com o eixo x (q é o próprio (2,0))
+  	// não é uma resposta válida pra responder sim, por isso comentei o if abaixo
+    // if (isinseg(r.p, s) or isinseg(r.q, s)
+    // or isinseg(s.p, r) or isinseg(s.q, r)) return 1;
 
+    return ccw(r.p, r.q, s.p) != ccw(r.p, r.q, s.q) and
+    ccw(s.p, s.q, r.p) != ccw(s.p, s.q, r.q);
+
+    
+}
 
 }
 
-namespace td {
+namespace td { // 3d (três d)
 struct pt { // ponto
         ld x, y, z;
         pt(ld x_ = 0, ld y_ = 0, ld z_ = 0) : x(x_), y(y_), z(z_) {}
@@ -139,63 +137,6 @@ struct pt { // ponto
         }
 };
  
-struct line { // reta
-        pt p, q;
-        line() {}
-        line(pt p_, pt q_) : p(p_), q(q_) {}
-        friend istream& operator >> (istream& in, line& r) {
-                return in >> r.p >> r.q;
-        }
-        friend ostream & operator<<(ostream &out,line &r) {
-            return out << r.p.x << ' ' << r.p.y << " ---- " << r.q.x << ' ' << r.q.y;
-        }
-};
- 
-struct plane { // plano
-        array<pt, 3> p;  // pontos que definem o plano
-        array<ld, 4> eq; // equacao do plano
-        plane() {}
-        plane(pt p_, pt q_, pt r_) : p({p_, q_, r_}) { build(); }
- 
-        friend istream& operator >> (istream& in, plane& P) {
-                return in >> P.p[0] >> P.p[1] >> P.p[2];
-                P.build();
-        }
-        void build() {
-                pt dir = (p[1] - p[0]) ^ (p[2] - p[0]);
-                eq = {dir.x, dir.y, dir.z, dir*p[0]*(-1)};
-        }
-};
- 
-// distancia de ponto a plano com sinal
-ld sdist(pt p, plane P) {
-        return P.eq[0]*p.x + P.eq[1]*p.y + P.eq[2]*p.z +  P.eq[3];
-}
- 
-// intersecao de plano e segmento
-// BOTH = o segmento esta no plano
-// ONE = um dos pontos do segmento esta no plano
-// PARAL = segmento paralelo ao plano
-// CONCOR = segmento concorrente ao plano
-enum RETCODE {BOTH, ONE, PARAL, CONCOR};
-pair<RETCODE, pt> intersect(plane &P, line r) {
-    ld d1 = sdist(r.p, P);
-    ld d2 = sdist(r.q, P);
-    if (eq(d1, 0) and eq(d2, 0))
-                return pair(BOTH, r.p);
-    if (eq(d1, 0))
-                return pair(ONE, r.p);
-    if (eq(d2, 0))
-                return pair(ONE, r.q);
-    if ((d1 > 0 and d2 > 0) or (d1 < 0 and d2 < 0)) {
-        if (eq(d1-d2, 0)) return pair(PARAL, pt());
-        return pair(CONCOR, pt());
-    }
-    ld frac = d1 / (d1 - d2);
-    pt res = r.p + ((r.q - r.p) * frac);
-    return pair(ONE, res);
-}
- 
 }
 
 int main() { _
@@ -212,6 +153,7 @@ int main() { _
     vector<dd::pt> v(n);
     for(dd::pt &i:v) cin >> i;
 
+
     dd::pt intc(pico.x,pico.y);
     ld dx = sun.x-pico.x,dy = sun.y-pico.y, dz = sun.z-pico.z;
     intc.x -= (pico.z/dz)*dx;
@@ -224,11 +166,25 @@ int main() { _
 
     for(int i=0;i<n;i++) {
         dd::line a(intc,v[i]);
+        if(a.p==a.q) continue;
         // cout << a << '\n';
 
         for(int j=1;j<n-1;j++) {
             dd::line b(v[(i+j)%n],v[(i+j+1)%n]);
-            if(a==b or (dd::col(a.p,a.q,b.p) and dd::col(a.p,a.q,b.q))) continue;
+            // if(a==b or (dd::col(a.p,a.q,b.p) and dd::col(a.p,a.q,b.q))) continue;
+            if(dd::interseg(a,b)) {
+                // cout << a.p.x << ' ' << a.p.y << " --- " << a.q.x << ' ' << a.q.y << '\n';
+                // cout << b.p.x << ' ' << b.p.y << " --- " << b.q.x << ' ' << b.q.y << '\n';
+                cout << "S\n";
+                return 0;
+            }
+        }
+
+        a.q = (v[i]+v[(i+1)%n])/2;
+        
+        for(int j=0;j<n;j++) {
+            dd::line b(v[j],v[(j+1)%n]);
+            // if(a==b or (dd::col(a.p,a.q,b.p) and dd::col(a.p,a.q,b.q))) continue;
             if(dd::interseg(a,b)) {
                 // cout << a.p.x << ' ' << a.p.y << " --- " << a.q.x << ' ' << a.q.y << '\n';
                 // cout << b.p.x << ' ' << b.p.y << " --- " << b.q.x << ' ' << b.q.y << '\n';
