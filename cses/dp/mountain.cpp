@@ -14,7 +14,15 @@ int main() { _
     vector<int> v(n);
     for(int &i:v) cin >> i;
 
+    {map<int,vector<int>> m;
+    for(int i=0;i<n;i++) m[v[i]].push_back(i);
+    ans=0;
+    for(auto it = m.begin();it!=m.end();it++) {
+        for(int i:it->ss) v[i] = ans;
+        ans++;
+    }}
     map<int,int> m;
+    ans=1;
 
     for(int i=n-1;i>=0;i--) {
         auto it = m.lower_bound(v[i]);
