@@ -8,17 +8,18 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-ll n = 1'000'001;
 
 int main() { _
+    ll n = 1'000'001;
+    const ll mod = 1'000'000'007LL;
+
     vector<ll> dp1(n),dp2(n);
     dp1[1] = dp2[1] = 1;
     
-    const ll mod = 1'000'000'007LL;
 
     for(ll i=2;i<n;i++) {
-        dp1[i]=dp1[i-1]*dp1[i-1];
-        dp2[i]=dp2[i-1]+dp1[i-1]+1;
+        dp1[i]=(4*dp1[i-1]+dp2[i-1])%mod;
+        dp2[i]=(dp1[i-1]+2*dp2[i-1])%mod;
     }
 
     cin >> n;
