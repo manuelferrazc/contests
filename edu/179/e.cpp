@@ -1,8 +1,6 @@
 #include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp> // Common file
 
 using namespace std;
-using namespace __gnu_pbds;
 
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
 #define ff first
@@ -10,109 +8,105 @@ using namespace __gnu_pbds;
 typedef long long ll;
 typedef unsigned long long ull;
 
-typedef tree<
-int,
-null_type,
-less<int>,
-rb_tree_tag,
-tree_order_statistics_node_update>
-ordered_set;
+vector<int> st;
+int q;
+
+int sett(int pos, int l, int r, int i, int v) {
+    if(i<l or r<i) return st[pos];
+    if(l==r) return st[pos] = v;
+
+    int m = (l+r)>>1,ls = 2*pos+1;
+    return st[pos] = sett(ls,l,m,i,v)|sett(ls+1,m+1,r,i,v);
+}
+
+int get(int pos, int l, int r, int lq, int rq) {
+    if(rq<l or r<lq) return 0;
+    if(lq<=l and r<=rq) return st[pos];
+
+    int m = (l+r)>>1,ls = 2*pos+1;
+    return get(ls,l,m,lq,rq)|get(ls+1,m+1,r,lq,rq);
+}
+
+int find(int v, int l=0) {
+    int r=q-1;
+    if((get(0,0,q-1,l,q-1)&v)==0) return -1;
+
+    int ans=q-1;
+
+    while(l<=r) {
+        int m = (l+r)>>1;
+        int x = get(0,0,q-1,l,m);
+        if(x&v) {
+            ans = m;
+            r=m-1;
+        } else l=m+1;
+    }
+
+    return ans;
+}
 
 void solve() {
-    int n,q;
+    int n;
     cin >> n >> q;
     string s;
     cin >> s;
-    
-    
-    vector<vector<int>> c(3,vector<int>(3,0)),cont(3,vector<int>(3,0));
-    vector<pair<char,char>> v(q);
 
-    map<char,ordered_set> m;
-    m.insert(make_pair('a',ordered_set()));
-    m.insert(make_pair('b',ordered_set()));
-    m.insert(make_pair('c',ordered_set()));
-    for(int i=0;i<n;i++) m[s[i]].insert(i);
+    st.assign(q<<2,0);
 
     for(int i=0;i<q;i++) {
         string a,b;
         cin >> a >> b;
-
-        v[i].ff = a[0];
-        v[i].ss = b[0];
-        c[a[0]-'a'][b[0]-'a']++;
+        if(a[0]=='a' or a[0]==b[0]) continue;
+        else if(a[0]=='b' and b[0]=='a') sett(0,0,q-1,i,1);
+        else if(a[0]=='b' and b[0]=='c') sett(0,0,q-1,i,2);
+        else if(a[0]=='c' and b[0]=='a') sett(0,0,q-1,i,4);
+        else sett(0,0,q-1,i,8);
     }
 
-    // for(int i=0;i<n;i++) {
-    //     if(s[i]=='b') {
-    //         if(c[1][0]) {
-    //             s[i]='a';
-    //             c[1][0]--;
-    //         } else if(c[1][2] and c[2][0]) {
-    //             c[1][2]--;
-    //             c[2][0]--;
-    //             s[i]='a';
-    //         }
-    //     } else if(s[i]=='c') {
-    //         if(c[2][0]) {
-    //             c[2][0]--;
-    //             s[i]='a';
-    //         }
-    //         else if(c[2][1] and c[1][0]) {
-    //             c[2][1]--;
-    //             c[1][0]--;
-    //             s[i]='a';
-    //         } else if(c[2][1]) {
-    //             c[2][1]--;
-    //             s[i] = 'b';
-    //         }
-    //     }
-    // }
-
-    for(int i=0;i<q;i++) {
-        if(i) c[v[i-1].ff-'a'][v[i-1].ss-'a']--;
-        if(cont[v[i].ff-'a'][v[i].ss-'a']) {
-            cont[v[i].ff-'a'][v[i].ss-'a']--;
-            continue;
-        }
-
-        if(v[i].ff==v[i].ss or v[i].ff=='a') continue;
-        
-        if(v[i].ff == 'b' and v[i].ss=='c') {
-            if(m['b'].empty()) continue;
-
-            if(c[2][0]>m['c'].size()) {
-                auto it = m['b'].begin();
-                s[*it] = 'a';
-                m['a'].insert(*it);
-                m['b'].erase(it);
-                cont[2][0]++;
+    // for(int i=0;i<q;i++) cout << get(0,0,q-1,i,i) << ' ';
+    // cout << '\n';
+    // return ;
+    
+    for(int i=0;i<n;i++) {
+        if(s[i]=='b') {
+            int x = find(1);
+            if(x!=-1) {
+                s[i] = 'a';
+                sett(0,0,q-1,x,0);
+            } else {
+                x = find(2);
+                if(x==-1 or x==q-1) continue;
+                int y = find(4,x+1);
+                if(y!=-1) {
+                    sett(0,0,q-1,x,0);
+                    sett(0,0,q-1,y,0);
+                    s[i] = 'a';
+                }
             }
-        } else if(v[i].ff == 'b' and v[i].ss=='a') {
-            if(m['b'].empty()) continue;
-
-            auto it = m['b'].begin();
-            s[*it] = 'a';
-            m['a'].insert(*it);
-            m['b'].erase(it);
-        } else if(v[i].ff == 'c' and v[i].ss=='b') {
-            if(m['c'].empty()) continue;
-            
-            if(c[1][0]>m['b'].size()) {
-                auto it = m['b'].begin();
-                s[*it] = 'c';
-                m['c'].insert(*it);
-                m['b'].erase(it);
+        } else if(s[i]=='c') {
+            int x = find(4);
+            if(x!=-1) {
+                sett(0,0,q-1,x,0);
+                s[i] = 'a';
+            } else {
+                x = find(8); // c b
+                if(x==q-1) {
+                    s[i] = 'b';
+                    sett(0,0,q-1,x,0);
+                } else if(x!=-1) {
+                    int y = find(1,x);
+                    if(y!=-1) {
+                        s[i] = 'a';
+                        sett(0,0,q-1,x,0);
+                        sett(0,0,q-1,y,0);
+                    } else {
+                        s[i] = 'b';
+                        sett(0,0,q-1,x,0);
+                    }
+                }
             }
-        } else {
-            if(m['c'].empty()) continue;
-            auto it = m['c'].begin();
-            s[*it] = 'a';
-            m['a'].insert(*it);
-            m['b'].erase(it);
         }
-    } 
-
+    }
     cout << s << '\n';
 }
 
