@@ -110,6 +110,13 @@ bool interseg(line r, line s) { // se o seg de r intersecta o seg de s
     
 }
 
+
+ld polarea(vector<pt> &v) { // area do poligono
+	ld ret = 0;
+	for (int i = 0; i < v.size(); i++)
+		ret += sarea(pt(0, 0), v[i], v[(i + 1) % v.size()]);
+	return abs(ret);
+}
 }
 
 namespace td { // 3d (três d)
@@ -159,8 +166,24 @@ int main() { _
     intc.x -= (pico.z/dz)*dx;
     intc.y -= (pico.z/dz)*dy;
     // cout << intc.x << ' ' << intc.y << ' ' << '\n';
-    if(dd::inpol(v,intc)==0) {
+
+    int status = dd::inpol(v,intc); 
+    if(status==0) {
         cout << "S\n";
+        return 0;
+    }
+    if(status==2) {
+        ld area = dd::polarea(v);
+        vector<dd::pt> t(3);
+        t[0] = intc;
+        for(int i=0;i<n;i++) {
+            t[1] = v[i];
+            t[2] = v[(i+1)%n];
+            if(dd::col(t[0],t[1],t[2]) or t[0]==v[i] or t[0]==t[2]) continue;
+            area-=dd::polarea(t);
+        }
+        if(eq(area,0)) cout << "N\n";
+        else cout << "S\n";
         return 0;
     }
 
