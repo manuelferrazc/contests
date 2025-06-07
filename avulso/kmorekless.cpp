@@ -130,12 +130,12 @@ vector<mint> calc(vector<mint> p) {
         i<<=j;
     }
     
-    vector<mint> a(p.size()-i), b(i);
-    for(ull j=0;j<a.size();j++) a[j] = p[j];
-    for(ull j=p.size()-i;j<p.size();j++) b[j-a.size()] = p[j];
+    vector<mint> a(i), b(p.size()-i);
+    for(ull j=0;j<i;j++) a[j] = p[j];
+    for(ull j=i;j<p.size();j++) b[j-i] = p[j];
 
     auto v1 = calc(a), v2 = calc(b);
-    v2 = convolution(v2,m[(int)a.size()]);
+    v2 = convolution(v2,m.at(i));
 
     for(ull j=0;j<v1.size();j++) v2[j]+=v1[j];
     return v2;
@@ -176,7 +176,6 @@ int main() { _
     // print(p);
     for(ull i=0;i<p.size();i++) {
         p[i]+=t[i];
-        p[i]+=998244353;
         cout << p[i] << ' ';
     }
     
