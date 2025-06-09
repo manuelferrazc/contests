@@ -8,46 +8,14 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+bool getsol(ll n, ll v1, ll v2, ll &x, ll &y) {
+    y = -(v2-2*v1);
+    if(y<0 or y%(n+1)) return false;
+    y/=n+1;
 
-// void odd(vector<ll> &v) {
-    //     vector<ll> aux;
-    //     for(ll i=0,j=v.size()-1;i<j;i++,j--) aux.push_back(v[i]+v[j]);
-    //     ll s = n+1;
-    //     ll r = v[v.size()/2]/(v.size()/2+1);
-//     ll res = v[v.size()/2]%(v.size()/2+1);
-//     if(res) {
-    //         cout << "NO\n";
-    //         return;
-//     }
-//     for(ull i=0;i<aux.size();i++) {
-//         if(aux[i]/s!=r or aux[i]%s) {
-//             cout << "NO\n";
-//             return;
-//         }
-//     }
-
-//     cout << "YES\n";
-// }
-
-// void even(vector<ll> &v) {
-    //     vector<ll> aux;
-    //     for(ll i=0,j=v.size()-1;i<j;i++,j--) aux.push_back(v[i]+v[j]);
-    //     ll s = n+1;
-    //     ll r = aux[0]/s;
-    //     ll res = aux[0]%s;
-//     if(res) {
-//         cout << "NO\n";
-//         return;
-//     }
-//     for(ull i=1;i<aux.size();i++) {
-    //         if(aux[i]/s!=r or aux[i]%s) {
-        //             cout << "NO\n";
-        //             return;
-        //         }
-        //     }
-        
-        //     cout << "YES\n";
-        // }
+    x = v1 - y*n;
+    return x>=0;
+}
         
 void solve() {
     ll n;
@@ -55,28 +23,19 @@ void solve() {
     vector<ll> v(n);
     for(ll &i:v) cin >> i;
 
-    bool ok = true;
-    for(int i=0;i<n;i++) {
-        if(v[i]%(n+1)) {
-            ok = false;
-            break;
-        }
-    }
-
-    if(ok) {
-        cout << "YES\n";
+    ll x,y;
+    if(not getsol(n,v[0],v[1],x,y)) {
+        cout << "NO\n";
         return;
     }
-    ok = true;
-    for(int i=0;i<n;i++) {
-        if((v[i])%(n-i)) {
-            ok = false;
-            break;
+
+    for(ll i=2;i<n;i++) {
+        if(x*(i+1)+y*(n-i)!=v[i]) {
+            cout << "NO\n";
+            return;
         }
     }
-
-    if(ok) cout << "YES\n";
-    else cout << "NO\n";
+    cout << "YES\n";
 }
 
 int main() { _
