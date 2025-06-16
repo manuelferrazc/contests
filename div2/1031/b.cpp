@@ -12,14 +12,8 @@ void solve() {
     ll w,h,a,b,x1,y1,x2,y2;
     cin >> w >> h >> a >> b >> x1 >> y1 >> x2 >> y2;
     
-    if(x1<x2 and y1+b>y2 and (x2-x1)%a) cout << "NO\n";
-    else if(x2<x1 and y2+b>y1 and (x1-x2)%a) cout << "NO\n";
-    else if(y1<y2 and x1+a>x2 and (y2-y1)%b) cout << "NO\n";
-    else if(y2<y1 and x2+a>x1 and (y1-y2)%b) cout << "NO\n";
-
-    else if((min(x1,x2)+2*a<=max(x1,x2) and min(y1,y2)+2*b<=max(y1,y2)) and 
-        ((max(y1,y2)-min(y1,y2))%b and max(x1,x2)-min(x1,x2))%a) cout << "NO\n";
-    else cout << "YES\n";
+    if((x1!=x2 and (x1-x2)%a==0) or (y1!=y2 and (y2-y1)%b==0)) cout << "YES\n";
+    else cout << "NO\n";
 }
 
 int main() { _
