@@ -41,13 +41,13 @@ struct hhash {
 
 		for(int i=1;i<(int)s.size();i++) {
 			p[i] = p[i-1]*b%mod;
-			h[i] = (h[i-1]+s[i]*p[i])%mod;
+			h[i] = (h[i-1]*b+s[i])%mod;
 		}
 	}
 
 	ll get(int l, int r) {
 		if(l==0) return h[r];
-		return (h[r]-h[l-1]+mod)%mod*fexp(p[l],mod-2,mod)%mod;
+		return (h[r]-(h[l-1]*p[r-l+1]%mod)+mod)%mod;
 	}
 };
 
@@ -64,7 +64,7 @@ int main() { _
 	hhash r1(r,1'000'000'033,b),r2(r,1'000'000'087,b2);
 
 	
-	for(int i=n-1;;i--) {
+	for(int i=n-1;i>=0;i--) {
 		if(s1.get(n-1-i,n-1)==r1.get(0,i) and s2.get(n-1-i,n-1)==r2.get(0,i)) {
 			cout << s+r.substr(i+1) << '\n';
 			return 0;
