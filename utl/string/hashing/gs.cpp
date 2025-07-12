@@ -8,10 +8,6 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-const ll mod1 = 1'000'000'007LL;
-const ll mod2 = 1'000'000'009LL;
-const ll p = 31LL;
-
 ll fexp(ll n, ll e, ll m) {
     if(e==0) return 1;
     if(e==1) return n;
@@ -22,36 +18,52 @@ ll fexp(ll n, ll e, ll m) {
     return r;
 }
 
-int main() { _
-    string a,b;
-    ll k;
-    cin >> a >> b >> k;
+struct Hash {
+    ll mod,b;
+    vector<ll> h,p;
 
-    ll n = a.size();
+    Hash(string &s, ll _mod, ll _b) : mod(_mod), b(_b), h(s.size()), p(s.size()) {
+        p[0] = 1;
+        h[0] = (s[0]-'a'+1);
 
-    vector<pair<ll,ll>> ans;
-
-    for(ll i=0;i<n;i++) {
-        pair<ll,ll> h;
-        h.ff = h.ss = 0;
-        ll qtd=0;
-
-        for(ll j=i;j<n;j++) {
-            if(b[(a[j]-'a')]=='0') {
-                if(qtd==k) break;
-                qtd++;
-            }
-            h.ff = (h.ff+fexp(p,j-i,mod1)*(a[j]-'a'+1LL))%mod1;
-            h.ss = (h.ss+fexp(p,j-i,mod2)*(a[j]-'a'+1LL))%mod2;
-
-            ans.push_back(h);
+        for(int i=1;i<s.size();i++) {
+            p[i] = p[i-1]*b%mod;
+            h[i] = (h[i-1]*b+(s[i]-'a'+1))%mod;
         }
     }
 
-    sort(ans.begin(),ans.end());
-    ll x=!ans.empty();
-    for(ull i=1;i<ans.size();i++) if(ans[i]!=ans[i-1]) x++;
-    cout << x << '\n';
+    ll get(ll l, ll r) {
+        if(l==0) return h[r];
+        return ((h[r]-(h[l-1]*p[r-l+1])%mod)+mod)%mod;
+    }
+};
+
+int main() { _
+    string s,t;
+    ll k;
+    cin >> s >> t >> k;
+
+    Hash h(s,1'000'000'007,27);
+    Hash h2(s,1'000'000'009,27);
+    vector<pair<ll,ll>> v;
+    ll qtd;
+
+    for(int i=0;i<s.size();i++) {
+        qtd=0;
+        for(int j=i;j<s.size();j++) {
+            if(t[s[j]-'a']=='0') {
+                qtd++;
+                if(qtd>k) break;
+            }
+
+            v.push_back({h.get(i,j),h2.get(i,j)});
+        }
+    }
+
+    ll ans=!v.empty();
+    sort(v.begin(),v.end());
+    for(int i=1;i<v.size();i++) if(v[i]!=v[i-1]) ans++;
+    cout << ans << '\n';
 
     return 0;
 }
