@@ -8,45 +8,28 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-double dp[1'000'001][21]; // prob
-double dp2[1'000'001][21]; // e(x)
-int qtd[1'000'001][21]; // qtd de jeitos de chegar aq
-bool vis[1'000'001][21];
-double ans=0;
+double dp[2'000'001][21]; // prob
+bool vis[2'000'001][21];
 
-void dfs(int nlim, int n, int x) {
-    if(vis[n][x]) return;
+double dfs(int nlim, int n, int x) {
+    if(n<=0 or n>=nlim) return 0;
+    if(vis[n][x]) return dp[n][x];
     vis[n][x] = 1;
     
-    if(n+(1<<x)<nlim) {
-        dp[n+(1<<x)][0]+=dp[n][x]/2;
-        qtd[n+(1<<x)][0]+=qtd[n][x];
-        dp2[n+(1<<x)][0]+=qtd[n][x]*dp[n][x]/2;
-    } else ans+=qtd[n][x]*dp[n][x]/2;
-    
-    if(n-(1<<x)>0) {
-        dp[n-(1<<x)][x+1]+=dp[n][x]/2;
-        qtd[n-(1<<x)][x+1]+=qtd[n][x];
-        dp2[n-(1<<x)][x+1]+=qtd[n][x]*dp[n][x]/2;
-    } else ans+=qtd[n][x]*dp[n][x]/2;
-    
-
-    if(n-(1<<x)>0) dfs(nlim,n-(1<<x),x+1);
-    if(n+(1<<x)<nlim) dfs(nlim,n+(1<<x),0);
+    return dp[n][x] = dfs(nlim,n+(1<<x),0)/2+dfs(nlim,n-(1<<x),x+1)/2+1;
 }
 
 int main() { _
     int n;
     cin >> n;
 
-    for(int i=0;i<1'000'001;i++) for(int j=0;j<21;j++) {
-        dp[i][j] = dp2[i][j] = 0;
-        vis[i][j] = qtd[i][j] = 0;
+    for(int i=0;i<2'000'001;i++) for(int j=0;j<21;j++) {
+        dp[i][j] = 0;
+        vis[i][j] = 0;
     }
 
-    dp[n][0] = 1;
-    qtd[n][0] = 1;
+    dfs(n+n,n,0);
     
-    cout << fixed << setprecision(10) << ans << '\n';
+    cout << fixed << setprecision(10) << dfs(n+n,n,0) << '\n';
     return 0;
 }
