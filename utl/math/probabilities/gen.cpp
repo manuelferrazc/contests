@@ -4,7 +4,7 @@ mt19937 rng((int) chrono::steady_clock::now().time_since_epoch().count());
 
 int main(int argc, char**argv) {
     srand(atoi(argv[1]));
-    int n = 1+ rand()%18;
+    int n = 1+ rand()%13;
     cout << n << '\n';
     double m[n][n];
     uniform_real_distribution<double> d(0,1);
