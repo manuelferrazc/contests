@@ -1,4 +1,4 @@
-#pragma GCC target ("avx2")
+#pragma GCC target ("avx2") 
 #pragma GCC optimize ("O3")
 #pragma GCC optimize ("unroll-loops")
 
@@ -12,83 +12,85 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-mt19937 rng((int) chrono::steady_clock::now().time_since_epoch().count());
-
 int n;
-double prob[18][18];
+double prob[18][18], ans = 0;
 
-double dp[18][1<<18];
-
-double ddp(int p, int mask) {
-    if((mask&(1<<p))==0) return 0;
-    if(dp[p][mask]>-0.5) return dp[p][mask];
-
-    double a=0,b=0;
-    int x=0;
-
-    for(int i=0;i<n;i++) {
-        if(i==p or (mask&(1<<i))==0) {if(i==p)x++;continue;} // continue;
-        a = max(a,ddp(p,mask^(1<<i))*prob[p][i]);// esse já ganhou um e vai lutar dnv 
-        // a += ddp(p,mask^(1<<i))*prob[p][i];// esse já ganhou um e vai lutar dnv 
-        // b += ddp(i,mask^(1<<p))*prob[p][i];// quem ganhou foi o outro, mas o outro perde agr 
-        b += ddp(i,mask^(1<<p))*prob[p][i];// quem ganhou foi o outro, mas o outro perde agr 
+double mx(vector<int> &v, vector<bool> &us) {
+    vector<double> dp(n,0);
+    dp[v[0]] = prob[v[0]][v[1]];
+    dp[v[1]] = prob[v[1]][v[0]];
+    for(int i=2;i<v.size();i++) {
+        for(int j=0;j<i;j++) dp[v[i]]+=dp[v[j]]*prob[v[i]][v[j]];
+        for(int j=0;j<i;j++) dp[v[j]]*=prob[v[j]][v[i]];
+    }
+    
+    for(int i=1;i<n;i++) {
+        if(not us[i]) {
+            for(int j=0;j<v.size();j++) dp[i]+=dp[v[j]]*prob[i][v[j]];
+        }
     }
 
-    if(x!=1) {
-        cerr << "ERRO!!!!!!!!!!!!!!\n";
-        exit(13);
-    }
+    for(int i=1;i<n;i++) dp[0]+=dp[i]*prob[0][i];
+    return dp[0];
+}
 
-    return dp[p][mask] = max(a,b);
+void calc(vector<int> &v, vector<bool> &us) {
+    if(v.size()==n-1) {
+        ans = max(ans,mx(v,us));
+        return;
+    }
+    if(mx(v,us)<=ans) return;
+
+    for(int i=1;i<n;i++) {
+        if(us[i]==false) {
+            us[i] = true;
+            v.push_back(i);
+            calc(v,us);
+            us[i] = false;
+            v.pop_back();
+        }
+    }
 }
 
 int main() { _
     cin >> n;
+    
     if(n==1) {
         cout << "1\n";
         return 0;
     }
-
+    
     for(int i=0;i<n;i++) for(int j=0;j<n;j++) cin >> prob[i][j];
 
-    // for(int i=0;i<n;i++) for(int j=0;j<(1<<n);j++) dp[i][j] = -1;
-    // for(int i=0;i<n;i++) dp[i][(1<<i)] = 1;
-
-    double ans = 0;
-    int v[n];
-    iota(v,v+n,0);
-    // shuffle (prob[0].begin(), prob[0].end(), rng);
-
-    double dp[n];
-    if(n<=10) { 
+    if(n<=10) {
+        int v[n];
+        iota(v,v+n-1,1);
+        v[n-1] = 0;
+        double dp[n];
         do {
             dp[v[0]] = prob[v[0]][v[1]];
             dp[v[1]] = prob[v[1]][v[0]];
-
             for(int i=2;i<n;i++) {
                 dp[v[i]] = 0;
                 for(int j=0;j<i;j++) dp[v[i]]+=dp[v[j]]*prob[v[i]][v[j]];
                 for(int j=0;j<i;j++) dp[v[j]]*=prob[v[j]][v[i]];
             }
             ans = max(ans,dp[0]);
-        } while(next_permutation(v,v+n));
+        } while(next_permutation(v,v+n-1));
     } else {
-        for(int cu=0;cu<7'000'000;cu++) {
-            shuffle (v, v+n, rng);
-            dp[v[0]] = prob[v[0]][v[1]];
-            dp[v[1]] = prob[v[1]][v[0]];
-
-            for(int i=2;i<n;i++) {
-                dp[v[i]] = 0;
-                for(int j=0;j<i;j++) dp[v[i]]+=dp[v[j]]*prob[v[i]][v[j]];
-                for(int j=0;j<i;j++) dp[v[j]]*=prob[v[j]][v[i]];
+        for(int i=1;i<n;i++) {
+            for(int j=i+1;j<n;j++) {
+                vector<int> v;
+                v.push_back(i);
+                v.push_back(j);
+                vector<bool> us(n,false);
+                us[i] = us[j] = true;
+                calc(v,us);
             }
-
-            ans = max(ans,dp[0]);
         }
     }
-
     cout << fixed << setprecision(10) << ans << '\n';
 
     return 0;
 }
+
