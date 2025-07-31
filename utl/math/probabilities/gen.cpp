@@ -1,26 +1,38 @@
 #include <bits/stdc++.h>
 using namespace std;
-mt19937 rng((int) chrono::steady_clock::now().time_since_epoch().count());
+
+int get(int a, vector<int> &p) {
+    return p[a] = p[a]==a? a : get(p[a],p);
+}
+
+bool unio(int a, int b, vector<int> &p, vector<int> &r) {
+    a = get(a,p);
+    b = get(b,p);
+    if(a==b) return false;
+
+    if(r[b]>r[a]) swap(a,b);
+    else if(r[a]==r[b]) r[a]++;
+    p[b] = a;
+    return true;
+}
 
 int main(int argc, char**argv) {
     srand(atoi(argv[1]));
     int n = 1+ rand()%13;
     cout << n << '\n';
-    double m[n][n];
-    uniform_real_distribution<double> d(0,1);
-    for(int i=0;i<n;i++) {
-        m[i][i] = 0;
-        for(int j=i+1;j<n;j++) {
-            double x = d(rng);
-            m[i][j] = x;
-            m[j][i] = 1-x;
+    
+    vector<int> p(n),r(n,1);
+    iota(p.begin(),p.end(),0);
+
+    for(int j=1;j<n;) {
+        int a = 1 + rand()%n, b = 1+rand()%n;
+        if(a==b) continue;
+
+        if(unio(a-1,b-1,p,r)) {
+            cout << a << ' ' << b << '\n';
+            j++;
         }
     }
 
-    for(int i=0;i<n;i++) {
-        for(int j=0;j<n;j++) cout << m[i][j] << ' ';
-        cout << '\n';
-    }
-    // cout << '\n';
     return 0;
 }
