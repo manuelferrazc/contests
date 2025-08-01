@@ -3,7 +3,7 @@ using namespace std;
 
 int main(int argc, char**argv) {
     srand(atoi(argv[1]));
-    int n = 1+ rand()%6;
+    int n = 1+ rand()%20;
     cout << 1 << '\n' << n << '\n';
     vector<int> perm(n);
     iota(perm.begin(),perm.end(),1);
