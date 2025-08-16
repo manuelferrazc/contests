@@ -8,31 +8,16 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-const ll mod = 1e9+7;
-
-ll fexp(ll x, ll y) { // iterativo
-	ll ret = 1;
-	while (y) {
-		if (y & 1) ret = (ret * x) % mod;
-		y >>= 1;
-		x = (x * x) % mod;
-	}
-	return ret;
-}
-
-ll fexp(ll a, ll b, ll c) {
-    if(c==0) return a;
-    if(c==1) return fexp(a,b);
-
-    ll e2 = fexp(b,(c>>1)+(c&1));
-    ll x = fexp(a,b,c>>1);
-    return fexp(x,e2);
+ll fexp(ll n, ll e, ll mod=1'000'000'007) {
+    if(e==0) return 1;
+    ll r = fexp(n*n%mod,e>>1,mod);
+    return e&1 ? r*n%mod : r;
 }
 
 void solve() {
     ll a,b,c;
     cin >> a >> b >> c;
-    cout << fexp(a,b,c) << '\n';
+    cout << fexp(a,fexp(b,c,1'000'000'006)) << '\n';
 }
 
 int main() { _
