@@ -6,10 +6,10 @@ using namespace std;
 #define ff first
 #define ss second
 typedef long long ll;
-typedef unsigned long long ull;
+typedef unsigned ull;
 
 struct base {
-    set<ull> s;
+    vector<ull> s;
 
     int getdim() {
         return s.size();
@@ -20,7 +20,10 @@ struct base {
             mask = min(mask,mask^*it);
         }
 
-        if(mask) s.insert(mask);
+        if(mask) {
+            auto it = lower_bound(s.begin(), s.end(), mask);
+            s.insert(it, mask);
+        }
     }
 
     bool contains(ull mask) {
@@ -28,61 +31,113 @@ struct base {
             mask = min(mask,mask^*it);
         }
 
-        if(mask) return true;
-        return false;
+        if(mask) return false;
+        return true;
     }
 
-    void operator=(base &b) {
+    void operator=(base b) {
         s = b.s;
     }
 
-    base join(base &a, base &b) {
-        base r = a;
-        for(auto it = b.s.begin();it!=b.s.end();it++) r.add(*it);
-        return r;
+    void join(base &a, base &b) {
+        for(auto it = a.s.begin();it!=a.s.end();it++) add(*it);
+        for(auto it = b.s.begin();it!=b.s.end();it++) add(*it);
+    }
+
+    void join(base &b) {
+        for(auto it = b.s.begin();it!=b.s.end();it++) add(*it);
+    }
+
+    void print() {
+        cout << "BASE: ";
+        for(auto i:s) cout << i << ' ';
+        cout << '\n';
     }
 };
 
-int v[200001];
-int depth[200001];
+#define MAX 200001
+#define MAX2 18
 
-vector<vector<int>> adj;
-vector<vector<int>> pr(200001,vector<int>(19,-1));
-vector<vector<base>> ba(200001,vector<base>(19));
+vector<int> adj[MAX];
+base ba[MAX][MAX2];
+int ka[MAX][MAX2];
+int d[MAX], v[MAX];
+int l=18;
 
-void dfs(int u, int p=-1) {
-    if(p!=-1) {
-        pr[u][0] = p;
-        ba[u][0].add(v[p]);
-        depth[u] = 1+depth[p];
-    } else depth[u] = 0;
-    ba[u][0].add(v[u]);
+void dfs(int v, int p=-1) {
+    // cout << "vertice: " << v << '\n';
+    if(p!=-1) d[v] = d[p]+1;
+    ba[v][0].add(::v[v]);
+    // ba[v][0].print();
+    ka[v][0] = p;
 
-    for(int i=1;i<18;i++) {
-        if(pr[u][i-1]!=-1) {
-            pr[u][i] = pr[p[u][i-1]][i-1];
-            ba[u][i] = ba[u][i-1].join(ba[p[u][i-1]][i-1]);
+    for(int i=1;i<l;i++) {
+        if(ka[v][i-1]!=-1) {
+            ka[v][i] = ka[ ka[v][i-1] ][i-1];
+            ba[v][i].join(ba[v][i-1],ba[ ka[v][i-1] ][i-1]);
+            // cout << i << ' ';ba[v][i].print();
         } else break;
     }
 
-    for(int vv:adj[u]) 
-        if(vv!=p) dfs(vv,u);
+    for(int u:adj[v]) {
+        if(u==p) continue;
+        dfs(u,v);
+    }
 }
 
-int getk(int u, int k) {
-    for(int i=18;i;)
+int getKA(int a, int k) {
+    for(int i=0;i<l;i++) if(k&(1<<i)) a = ka[a][i];
+    return a;
 }
 
+int getLCA(int a, int b) {
+    if(d[a]<d[b]) swap(a,b);
+    if(d[a]!=d[b]) a = getKA(a,d[a]-d[b]);
+    if(a==b) return a;
 
+    for(int i=l-1;i>=0;i--) {
+        if(ka[a][i]!=ka[b][i]) {
+            a = ka[a][i];
+            b = ka[b][i];
+        }
+    }
+
+    return ka[a][0];
+}
+
+void join(int a, int b, int x) {
+    base r;
+    int lca = getLCA(a,b);
+    r.add(v[lca]);
+
+    int k = d[a]-d[lca];
+
+    if(lca!=a) for(int i=0;i<l;i++) if(k&(1<<i)) {
+        r.join(ba[a][i]);
+        a = ka[a][i];
+    }
+    a = b;
+    k = d[a]-d[lca];
+
+    if(lca!=a) for(int i=0;i<l;i++) if(k&(1<<i)) {
+        r.join(ba[a][i]);
+        a = ka[a][i];
+    }
+
+    if(r.contains(x)) cout << "YES\n";
+    else cout << "NO\n";
+}
 
 int main() { _
     int n;
     cin >> n;
 
     for(int i=0;i<n;i++) cin >> v[i];
-    adj.resize(n);
+    for(int i=0;i<n;i++) for(int j=0;j<MAX2;j++) ka[i][j] = -1;
 
+    d[0] = -1;
     for(int i=1;i<n;i++) {
+        d[i]=-1;
         int a,b;
         cin >> a >> b;
         a--;
@@ -92,6 +147,16 @@ int main() { _
         adj[b].push_back(a);
     }
 
+    dfs(0);
+
+    int q;
+    cin >> q;
+
+    while(q--) {
+        int x,y,k;
+        cin >> x >> y >> k;
+        join(x-1,y-1,k);
+    }
 
     return 0;
 }
