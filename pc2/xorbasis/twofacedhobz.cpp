@@ -30,6 +30,30 @@ struct base {
             pivot();
         }
     }
+
+    bool contains(ll mask) {
+        for(auto it = s.rbegin();mask and it!=s.rend();it++) {
+            mask = min(mask,mask^*it);
+        }
+
+        if(mask) return false;
+        return true;
+    }
+
+    unsigned get(ll k) {
+        
+        ull ans=0;
+
+        for(ull i=0;i<s.size();i++) {
+            ull pos = s.size()-i-1;
+            if((1ULL<<pos)<k) {
+                ans^=s[pos];
+                k-=1ULL<<pos;
+            }
+        }
+
+        return ans;
+    }
 };
 
 struct Read {
@@ -57,25 +81,43 @@ void solve(Read &r) {
     unsigned n = r.get();
     unsigned k = r.get();
 
-    unsigned xa = 0;
+    // unsigned xa = 0;
     base b;
     vector<pair<unsigned,unsigned>> v(n);
     for(unsigned i=0;i<n;i++) {
         v[i].ff = r.get();
-        xa^=v[i].ff;
+        // xa^=v[i].ff;
+        cout << "read " << v[i].ff << '\n';
+
     }
 
     for(unsigned i=0;i<n;i++) {
         v[i].ss = r.get();
         b.add(v[i].ff^v[i].ss);
+        cout << "read " << v[i].ss << '\n';
     }
 
-    for(auto it = b.s.rbegin();it!=b.s.rend();it++) {
-        if(xa>k or (xa^*it)>k) xa = min(xa,xa^*it);
-        else xa = max(xa,xa^*it);
+    // for(auto it = b.s.rbegin();it!=b.s.rend();it++) {
+    //     if(xa>k or (xa^*it)>k) xa = min(xa,xa^*it);
+    //     else xa = max(xa,xa^*it);
+    // }
+
+    cout << "dim: " << n << ' ' << b.getdim() << '\n';
+
+    ll a=1,bb=(1LL<<b.getdim()),ans = 0;
+
+    while(a<=bb) {
+        ll m = (a+bb)>>1;
+
+        unsigned g = b.get(m);
+        if(g<=k) {
+            ans = g;
+            a = m+1;
+        } else bb = m-1;
     }
 
-    cout << (xa>k?0:xa) << '\n';
+    cout << ans << '\n';
+    // cout << (xa>k?0:xa) << '\n';
 }
 
 int main() { _
@@ -85,17 +127,17 @@ int main() { _
 
     while(t--) solve(r);
 
-    int n;
-    cin >> n;
-    base b;
-    while(n--) {
-        unsigned x;
-        cin >> x;
-        b.add(x);
-    }
+    // int n;
+    // cin >> n;
+    // base b;
+    // while(n--) {
+    //     unsigned x;
+    //     cin >> x;
+    //     b.add(x);
+    // }
 
-    for(unsigned i:b.s) cout << i << ' ';
-    cout << '\n';
+    // for(unsigned i:b.s) cout << i << ' ';
+    // cout << '\n';
 
 
     return 0;
