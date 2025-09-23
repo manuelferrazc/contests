@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 
-#pragma GCC target("avx2")
-#pragma GCC optimize("O3")
-#pragma GCC optimize("unroll-loops")
+// #pragma GCC target("avx2")
+// #pragma GCC optimize("O3")
+// #pragma GCC optimize("unroll-loops")
 
 using namespace std;
 
@@ -83,15 +83,23 @@ int main() { _
 		} else times[i+1] = times[i];
 
 	}
-
+	
+	ostringstream out;
+	
 	while(q--) {
 		cin >> l >> r;
 
 		int x = perseg::query(l-1,r-1,times[r]);
 
-		if(x==INT_MAX) cout << -1 << '\n';
-		else cout << x << '\n';
+		if(x==INT_MAX) out << -1 << '\n';
+		else out << x << '\n';
+		// out << res << '\n';
 	}
+
+    // for (int res : results) {
+    // }
+
+    cout << out.str();
 
     return 0;
 }
