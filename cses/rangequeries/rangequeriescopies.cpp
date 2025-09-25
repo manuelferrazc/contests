@@ -8,129 +8,79 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-struct SegTree {
-    
-    struct Node {
-        ll sum;
-        int l=-1, r=-1;
+// query(a, b, t) retorna a query de [a, b] na versao t
+// update(a, x, t) faz um update v[a]+=x a partir da
+// versao de t, criando uma nova versao e retornando seu id
+// Por default, faz o update a partir da ultima versao
+//
+// build - O(n)
+// query - O(log(n))
+// update - O(log(n))
 
-        Node(ll v=0): sum(v) {}
-        Node(ll _s, int _l, int _r): sum(_s), l(_l), r(_r) {}
-        Node(int _l, int _r): sum(0), l(_l), r(_r) {}
-    };
+const int MAX = 2e5+10, UPD = 2e5+10, LOG = 18;
+const int MAXS = 2*MAX+UPD*LOG;
 
-    int n
-    // ,lx=0
-    ;
-    vector<Node> v;
-    vector<int> roots;
+namespace perseg {
+	ll seg[MAXS];
+	int rt[UPD], L[MAXS], R[MAXS], cnt, t;
+	int n, *v;
 
-    int build(vector<int> &arr, int l, int r) {
-        if(l==r) {
-            v.push_back(Node(arr[l]));
-        // cout << l << ' ' << r << ' ' << v.back().sum << '\n';
-
-            return v.size()-1;
-        }
-
-        int m = (l+r)/2;
-
-        int nl = build(arr,l,m);
-        int nr = build(arr,m+1,r);
-
-        v.push_back(Node(v[nl].sum+v[nr].sum,nl,nr));
-        // cout << l << ' ' << r << ' ' << v.back().sum << '\n';
-        return v.size()-1;
-    }
-
-    SegTree(int _n, int _q, vector<int> &arr): n(_n) {
-        roots.push_back(build(arr,0,n-1));
-        // exit(0);
-    }
-
-    ll get(int root, int l, int r, int lq, int rq) {
-        if(r<lq or rq<l) return 0;
-        if(lq<=l and r<=rq) return v[root].sum;
-
-        int m = (l+r)/2;
-        return get(v[root].l,l,m,lq,rq)+get(v[root].r,m+1,r,lq,rq);
-    }
-
-    ll get(int t, int l, int r) {
-        if(roots.size()<=t) {
-            cout << "ERRO!!!!\n";
-            exit(1);
-        }
-
-        return get(roots[t],0,n-1,l,r);
-    }
-
-    int update(int root, int l, int r, int pos, ll x) {
-        if(l==r) {
-            v.push_back(Node(x));
-            return v.size()-1;
-        }
-        
-        int m = (l+r)/2;
-        if(pos<=m) {
-            auto lf = update(v[root].l,l,m,pos,x);
-            v.push_back(Node(lf,v[root].r));
-            v.back().sum = v[lf].sum+v[v[root].r].sum;
-        } else {
-            auto rf = update(v[root].r,m+1,r,pos,x);
-            v.push_back(Node(v[root].l,rf));
-            v.back().sum = v[v[root].l].sum+v[rf].sum;
-        }
-        
-        return v.size()-1;
-    }
-
-
-    void update(int t, int pos, ll x) {
-        if(roots.size()<=t) {
-            cout << "ERRO!!!!\n";
-            exit(1);
-        }
-        roots[t] =  update(roots[t],0,n-1,pos,x);
-    }
-
-    void copy(int t) {
-        if(roots.size()<=t) {
-            cout << "ERRO!!!!\n";
-            exit(1);
-        }
-
-        roots.push_back(roots[t]);
-    }
-
+	ll build(int p, int l, int r) {
+		if (l == r) return seg[p] = v[l];
+		L[p] = cnt++, R[p] = cnt++;
+		int m = (l+r)/2;
+		return seg[p] = build(L[p], l, m) + build(R[p], m+1, r);
+	}
+	void build(int n2, int* v2) {
+		n = n2, v = v2;
+		rt[0] = cnt++;
+		build(0, 0, n-1);
+	}
+	ll query(int a, int b, int p, int l, int r) {
+		if (b < l or r < a) return 0;
+		if (a <= l and r <= b) return seg[p];
+		int m = (l+r)/2;
+		return query(a, b, L[p], l, m) + query(a, b, R[p], m+1, r);
+	}
+	ll query(int a, int b, int tt) {
+		return query(a, b, rt[tt], 0, n-1);
+	}
+	ll update(int a, int x, int lp, int p, int l, int r) {
+		if (l == r) return seg[p] = x;
+		int m = (l+r)/2;
+		if (a <= m)
+			return seg[p] = update(a, x, L[lp], L[p]=cnt++, l, m) + seg[R[p]=R[lp]];
+		return seg[p] = seg[L[p]=L[lp]] + update(a, x, R[lp], R[p]=cnt++, m+1, r);
+	}
+	int update(int a, int x, int tt=t) {
+		update(a, x, rt[tt], rt[++t]=cnt++, 0, n-1);
+		return t;
+	}
 };
 
-int main() { 
-    int n,q,op,k,a,b;
+int main() { _
+    int n,q;
+    
     cin >> n >> q;
+    int v[n];
+    for(int i=0;i<n;i++) cin >> v[i];
 
-    vector<int> v(n);
-    for(int &i:v) cin >> i;
+    int id[q+1], size = 1;
+    perseg::build(n,v);
+    id[1] = perseg::rt[0];
 
-    SegTree st(n,q,v);
-
+    int op,k,a,b;
     while(q--) {
         cin >> op >> k;
 
-        k--;
         if(op==1) {
             cin >> a >> b;
-            a--;
-            
-            st.update(k,a,b);
+            id[k] = perseg::update(a-1,b,id[k]);
         } else if(op==2) {
             cin >> a >> b;
-            a--;
-            b--;
-            
-            cout << st.get(k,a,b) << '\n';
-        } else st.copy(k);
+            cout << perseg::query(a-1,b-1,id[k]) << '\n';
+        } else id[++size] = id[k];
     }
-    
+
     return 0;
 }
