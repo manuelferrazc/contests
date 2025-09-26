@@ -8,31 +8,42 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-const int mod = 998'244'353;
+#define MAX 1'000'000
+const ll mod = 998'244'353;
 
-int gcd (int a, int b) {
-    while (b) {
-        a %= b;
-        swap(a, b);
-    }
-    return a;
-}
+
 
 int main() { _
+    vector<int> fat(MAX+1,1);
+    vector<int> primes_fat(MAX+1,1);
+
+    for(int i=2;i<=MAX;i++) {
+        if(fat[i]!=1) continue;
+        fat[i] = i;
+        primes_fat[i] = i;
+        for(int j=i+i;j<MAX;j+=i) {
+            fat[j] *= i;
+            primes_fat[j] = i;
+        }
+    }
+
     int n;
     cin >> n;
-    vector<int> v(n);
-    vector<int> dp(n,0);
-    dp.back()=1;
 
-    for(int i=0;i<n;i++) cin >> v[i];
+    vector<int> dp(MAX+1,0);
+    int x;
+    cin >> x;
+    x = fat[x];
 
-    for(int i = n-2;i>=0;i--) 
-        for(int j=i+1;j<n;j++) 
-            if(gcd(v[i],v[j])!=1) dp[i] = (dp[i]+dp[j])%mod;
+    dp[x] = 1;
+    for(int i=1;i<n;i++) {
+        cin >> x;
+        x = fat[x];
 
+        // vector<int> 
+    }
 
-    cout << dp.front() << endl;
+    cout << dp[x] << '\n';
 
     return 0;
 }

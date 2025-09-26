@@ -12,42 +12,27 @@ void solve() {
     ll x,k;
     cin >> k >> x;
 
-    ll qa = 1LL<<k, qb = 1ll<<k;
+    ll qa = (1LL<<(k+1))-x, qb = x;
 
     vector<int> ans;
     
-    while(qa!=x) {
-        cout << qa << ' ' << qb << '\n';
-        if(qa>x) {
-            if(qa%4==0) {
-                ans.push_back(1);
-                qb+=qa/2;
-                qa/=2;
-            }
-            else {
-                ans.push_back(2);
-                qa+=qb/2;
-                qb/=2;
-            }
+    while(qa!=qb) {
+        if(qa<qb) {
+            qb-=qa;
+            qa<<=1;
+            ans.push_back(2);
         } else {
-            if(qb%4==0) {
-                ans.push_back(2);
-                qa+=qb/2;
-                qb/=2;
-            }
-            else {
-                ans.push_back(1);
-                qb+=qa/2;
-                qa/=2;
-            }
+            qa-=qb;
+            qb<<=1;
+            ans.push_back(1);
         }
-        cout << qa << ' ' << qb << '\n';
-break;
     }
 
+    reverse(ans.begin(),ans.end());
+    
     cout << ans.size() << '\n';
     for(int i:ans) cout << i << ' ';
-    if(ans.size()) cout << '\n';
+    cout << '\n';
 }
 
 int main() { 
