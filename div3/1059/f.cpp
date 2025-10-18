@@ -12,7 +12,8 @@ void solve() {
     int n,m;
     cin >> n >> m;
     pair<int,int> v[m];
-
+    int lx=2;
+    
     vector<int> init(n+1,-1);
 
     for(int i=0;i<m;i++) {
@@ -76,55 +77,13 @@ void solve() {
             a++;
         }
         
-        while(s2.size() and *s2.begin()<=i) {
+        while(s2.size() and *s2.begin()<i) 
             s2.erase(s2.begin());
-        }
         
-        if(s2.size()>=1ull) {
-            for(int k=*s2.begin();k<=*s2.rbegin();k++) {
-                if(init[k]>i) continue;
-                int pj = k;
-                int lx=2;
-                for(int j=1;j<i;j++) cout << lx++ << ' ';
-                cout << 1 << ' ';
-                for(int j=i+1;j<pj;j++) cout << lx++ << ' ';
-                cout << 0 << ' ';
-                for(int j=pj+1;j<=n;j++) cout << lx++ << ' ';
-                cout << '\n';
-                return;
-            }
-
-        }
-    }
-
-    s2.clear();
-    a=m-1;
-    for(int i=0;i<m;i++) swap(v[i].ff,v[i].ss);
-    sort(v,v+m);
-    for(int i=0;i<m;i++) swap(v[i].ff,v[i].ss);
-
-    for(int i=0;i<(int)init.size();i++) init[i] = INT_MAX;
-
-    for(int i=0;i<m;i++) {
-        for(int j=v[i].ff;j<=v[i].ss;j++) init[j]=min(init[j],v[i].ss);
-    }
-
-    for(int i=n;i;i--) {
-        while(a<=0 and v[a].ss>=i) {
-            s2.insert(v[a].ff);
-            a--;
-        }
-
-        while(s2.size() and *s2.begin()>=i) {
-            s2.erase(s2.begin());
-        }
-
-        if(s2.size()>=1ull) { // i agr é o segundo
-            for(int k=*s2.rbegin();k>=*s2.begin();k--) {
-                if(init[k]<i) continue;
-
-                int pj = k;
-                int lx=2;
+        if(s2.size()) {
+            if(i+1<=*s2.rbegin() and i!=*s2.begin()) {
+                int pj = i+1;
+                // cout << "cu ";
                 for(int j=1;j<i;j++) cout << lx++ << ' ';
                 cout << 0 << ' ';
                 for(int j=i+1;j<pj;j++) cout << lx++ << ' ';
@@ -134,9 +93,21 @@ void solve() {
                 return;
             }
 
-        }
-    }
+            for(int j=i+1;j<=n;j++) {
+                if(init[j]<=i) { // todo intervalo q contém o j tbm contém o i
+                    for(int k=1;k<i;k++) cout << lx++ << ' ';
+                    cout << 1 << ' ';
+                    for(int k=i+1;k<j;k++) cout << lx++ << ' ';
+                    cout << 0 << ' ';
+                    for(int k=j+1;k<=n;k++) cout << lx++ << ' ';
+                    cout << '\n';
+                    return;
+                }
+            }
 
+        }
+
+    }
 
     // mex(M)=2
     cout << "0 2 1 ";
