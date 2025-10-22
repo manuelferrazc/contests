@@ -8,15 +8,32 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+struct Read {
+    queue<unsigned> st;
+
+    Read(string &&s) {
+        ifstream f(s);
+        unsigned x;
+        while(f >> x) st.push(x);
+        f.close();
+    }
+
+    unsigned get() {
+        unsigned r = st.front();
+        st.pop();
+        return r;
+    }
+
+    operator bool() {
+        return st.size()>0ULL;
+    }
+};
+
 struct base {
     vector<unsigned> s;
 
     int getdim() {
         return s.size();
-    }
-
-    void pivot() {
-        for(ll i=s.size()-1;i>0;i--) for(ll j=i-1;j>=0;j--) s[i] = min(s[i],s[i]^s[j]);
     }
 
     void add(unsigned mask) {
@@ -27,7 +44,6 @@ struct base {
         if(mask) {
             auto it = lower_bound(s.begin(), s.end(), mask);
             s.insert(it, mask);
-            pivot();
         }
     }
 
@@ -56,68 +72,38 @@ struct base {
     }
 };
 
-struct Read {
-    queue<unsigned> st;
-
-    Read(string &&s) {
-        ifstream f(s);
-        unsigned x;
-        while(f >> x) st.push(x);
-        f.close();
-    }
-
-    unsigned get() {
-        unsigned r = st.front();
-        st.pop();
-        return r;
-    }
-
-    operator bool() {
-        return st.size()>0ULL;
-    }
-};
-
-void solve(Read &r) {
+unsigned solve(Read &r) {
     unsigned n = r.get();
     unsigned k = r.get();
 
-    // unsigned xa = 0;
+    unsigned xa = 0;
     base b;
+
     vector<pair<unsigned,unsigned>> v(n);
     for(unsigned i=0;i<n;i++) {
         v[i].ff = r.get();
-        // xa^=v[i].ff;
-        cout << "read " << v[i].ff << '\n';
+        xa^=v[i].ff;
 
     }
 
     for(unsigned i=0;i<n;i++) {
         v[i].ss = r.get();
         b.add(v[i].ff^v[i].ss);
-        cout << "read " << v[i].ss << '\n';
     }
 
-    // for(auto it = b.s.rbegin();it!=b.s.rend();it++) {
-    //     if(xa>k or (xa^*it)>k) xa = min(xa,xa^*it);
-    //     else xa = max(xa,xa^*it);
-    // }
+    if(b.contains(xa^k)) return k;
 
-    cout << "dim: " << n << ' ' << b.getdim() << '\n';
-
-    ll a=1,bb=(1LL<<b.getdim()),ans = 0;
-
-    while(a<=bb) {
-        ll m = (a+bb)>>1;
-
-        unsigned g = b.get(m);
-        if(g<=k) {
-            ans = g;
-            a = m+1;
-        } else bb = m-1;
+    for(int i=0;(1<<i)>=k;i++) {
+        unsigned x = k;
+        if((xa^k)&(1<<i)) {
+            if(x&(1<<i)) x-=(1<<i);
+            else x+=(1<<i); 
+            x|=(1<<i)-1;
+            x-=(1<<i);
+        } else continue;
     }
 
-    cout << ans << '\n';
-    // cout << (xa>k?0:xa) << '\n';
+    return 0;
 }
 
 int main() { _
@@ -125,20 +111,7 @@ int main() { _
     
     int t = r.get();
 
-    while(t--) solve(r);
-
-    // int n;
-    // cin >> n;
-    // base b;
-    // while(n--) {
-    //     unsigned x;
-    //     cin >> x;
-    //     b.add(x);
-    // }
-
-    // for(unsigned i:b.s) cout << i << ' ';
-    // cout << '\n';
-
+    while(t--) cout << solve(r) << '\n';
 
     return 0;
 }
