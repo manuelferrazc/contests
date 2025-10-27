@@ -10,8 +10,7 @@ typedef unsigned long long ull;
 
 struct Line { // f(x) = ax+b
     ll a, b;
-
-    Line(ll _a=0, ll _b=LLONG_MIN) {
+    Line(ll _a=0, ll _b=LLONG_MIN) { // valor padrão, representa a "não existência" de uma reta
         a=_a;
         b=_b;
     }
@@ -21,15 +20,9 @@ struct Line { // f(x) = ax+b
     }
 };
 
-struct Node {
+struct Node { // l e r aqui representam os índices dos filhos à esquerda e à direita
     int l=-1, r=-1;
     Line ln;
-
-    Node() {}
-
-    Node(int _l, int _r): l(_l), r(_r) {}
-
-    Node(int _l, int _r, Line _ln): l(_l), r(_r), ln(_ln) {}
 
     ll val(ll x) {
         return ln.val(x);
@@ -38,7 +31,7 @@ struct Node {
 
 struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MIN
     vector<Node> v;
-    ll l_lim, r_lim;
+    ll l_lim, r_lim; // limites do domínio
     int aux;
 
     LiChao(ll _l, ll _r) {
@@ -53,19 +46,29 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
     }
 
     void addNewLine(Line ln, int pos, ll l, ll r) {
+        // em v[pos] tem a reta que maximiza l entre a atual e a nova
         if(v[pos].val(l)<ln.val(l)) swap(v[pos].ln,ln);
+
+        // se a reta de v[pos] também maximiza em r, então as retas não se intersectam nesse [l,r]
+        // a nova é pior, então pode ser descartada
         if(v[pos].val(r)>=ln.val(r)) return;
-        
+
         ll m = (l+r)/2;
         if(l+r<0 and ((l+r)&1)) m--;
 
+        // se chegar aqui, v[pos] maximiza em l mas não em r
+
         if(v[pos].val(m)>=ln.val(m)) {
+            // v[pos] também maximiza em m, então a interseção (ponto em que o ótimo é a nova linha)
+            // ocorre em um valor maior que m, repete a recursão para a direita
             if(v[pos].r==-1) {
                 aux = createNode();
                 v[pos].r = aux;
             }
             addNewLine(ln,v[pos].r,m+1,r);
         } else {
+            // v[pos] não maximiza em m, então a interseção ocorre no máximo em m
+            // inverte as retas (queremos maximizar em m) e chama a recursão para a esquerta
             swap(v[pos].ln,ln);
             if(v[pos].l==-1) {
                 aux = createNode();
@@ -102,14 +105,13 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
         ll m = (l+r)/2;
         if(l+r<0 and ((l+r)&1)) m--;
 
-        ll ret = LLONG_MIN;
+        ll ret = v[pos].val(x);
         if(x<=m) {
-            if(v[pos].l!=-1) ret = query(v[pos].l,l,m,x);
-            return max(ret,v[pos].val(x));
+            if(v[pos].l!=-1) ret = max(ret,query(v[pos].l,l,m,x));
         } else {
-            if(v[pos].r!=-1) ret = query(v[pos].r,m+1,r,x);
-            return max(ret,v[pos].val(x));
+            if(v[pos].r!=-1) ret = max(ret,query(v[pos].r,m+1,r,x));
         }
+        return ret; 
     }
 
     ll query(ll x) {
@@ -121,7 +123,7 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
     }
 
     void addLine(Line ln) {
-        addLine(ln,0,l_lim,r_lim,l_lim,r_lim);
+        addNewLine(ln,0,l_lim,r_lim);
     }
 };
 

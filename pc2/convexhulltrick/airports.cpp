@@ -8,33 +8,41 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-struct Line { // f(x) = ax+b
-    ll a, b;
-    Line(ll _a=0, ll _b=LLONG_MIN) { // valor padrão, representa a "não existência" de uma reta
+struct Line {
+    ll a, b, c;
+
+    Line(ll _a=0, ll _b=0, ll _c=LLONG_MAX) {
         a=_a;
         b=_b;
+        c=_c;
     }
 
     ll val(ll x) {
-        return a*x+b;
+        return a*x*x+b*x+c;
     }
 };
 
-struct Node { // l e r aqui representam os índices dos filhos à esquerda e à direita
+struct Node {
     int l=-1, r=-1;
     Line ln;
+
+    Node() {}
+
+    Node(int _l, int _r): l(_l), r(_r) {}
+
+    Node(int _l, int _r, Line _ln): l(_l), r(_r), ln(_ln) {}
 
     ll val(ll x) {
         return ln.val(x);
     }
 };
 
-struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MIN
+struct LiChao { // LiChao Tree de mínimo, se não tem segmento returna LLONG_MAX
     vector<Node> v;
-    ll l_lim, r_lim; // limites do domínio
+    ll l_lim, r_lim;
     int aux;
 
-    LiChao(ll _l, ll _r) {
+    LiChao(ll _l=-1'000'000'000, ll _r=1'000'000'000) {
         l_lim = _l;
         r_lim = _r;
         v.push_back(Node());
@@ -46,29 +54,19 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
     }
 
     void addNewLine(Line ln, int pos, ll l, ll r) {
-        // em v[pos] tem a reta que maximiza l entre a atual e a nova
-        if(v[pos].val(l)<ln.val(l)) swap(v[pos].ln,ln);
-
-        // se a reta de v[pos] também maximiza em r, então as retas não se intersectam nesse [l,r]
-        // a nova é pior, então pode ser descartada
-        if(v[pos].val(r)>=ln.val(r)) return;
-
+        if(v[pos].val(l)>ln.val(l)) swap(v[pos].ln,ln);
+        if(v[pos].val(r)<=ln.val(r)) return;
+        
         ll m = (l+r)/2;
         if(l+r<0 and ((l+r)&1)) m--;
 
-        // se chegar aqui, v[pos] maximiza em l mas não em r
-
-        if(v[pos].val(m)>=ln.val(m)) {
-            // v[pos] também maximiza em m, então a interseção (ponto em que o ótimo é a nova linha)
-            // ocorre em um valor maior que m, repete a recursão para a direita
+        if(v[pos].val(m)<=ln.val(m)) {
             if(v[pos].r==-1) {
                 aux = createNode();
                 v[pos].r = aux;
             }
             addNewLine(ln,v[pos].r,m+1,r);
         } else {
-            // v[pos] não maximiza em m, então a interseção ocorre no máximo em m
-            // inverte as retas (queremos maximizar em m) e chama a recursão para a esquerta
             swap(v[pos].ln,ln);
             if(v[pos].l==-1) {
                 aux = createNode();
@@ -105,13 +103,14 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
         ll m = (l+r)/2;
         if(l+r<0 and ((l+r)&1)) m--;
 
-        ll ret = v[pos].val(x);
+        ll ret = LLONG_MAX;
         if(x<=m) {
-            if(v[pos].l!=-1) ret = max(ret,query(v[pos].l,l,m,x));
+            if(v[pos].l!=-1) ret = query(v[pos].l,l,m,x);
+            return min(ret,v[pos].val(x));
         } else {
-            if(v[pos].r!=-1) ret = max(ret,query(v[pos].r,m+1,r,x));
+            if(v[pos].r!=-1) ret = query(v[pos].r,m+1,r,x);
+            return min(ret,v[pos].val(x));
         }
-        return ret; 
     }
 
     ll query(ll x) {
@@ -127,21 +126,47 @@ struct LiChao { // LiChao Tree de máximo, se não tem segmento returna LLONG_MI
     }
 };
 
-int main() { _
-    LiChao lichao(-1'000'000'000,1'000'000'000);
+struct Voo {
+    int part, dest;
+    ll tp, td;
 
-    int n;
-    ll op,a,b;
-    cin >> n;
+    Voo(int a=0, int b=0, ll c=0, ll d=0): part(a), dest(b), tp(c), td(d) {}
 
-    while(n--) {
-        cin >> op >> a;
-
-        if(op==1) {
-            cin >> b;
-            lichao.addLine(Line(a,b));
-        } else cout << lichao.query(a) << '\n';
+    bool operator<(const Voo &o) {
+        if(tp<o.tp) return true;
+        return (tp==o.tp and td<o.td);
     }
+
+    friend istream & operator>>(istream &in, Voo &v) {
+        in >> v.part >> v.dest >> v.tp >> v.td;
+        return in;
+    }
+};
+
+int main() { _
+    int n,m;
+    ll ans = LLONG_MAX;
+    cin >> n >> m;
+
+    vector<LiChao> v(n+1);
+    v[1].addLine(Line(1,0,0));
+
+    Voo voos[m];
+    for(int i=0;i<m;i++) cin >> voos[i];
+
+    sort(voos,voos+m);
+
+    for(int i=0;i<m;i++) {
+        auto [part, dest, tpart, tdest] = voos[i];
+
+        ll dp = v[part].query(tpart);
+        if(dp==LLONG_MAX) continue;
+
+        v[dest].addLine(Line(1,-2*tdest,tdest*tdest+dp),tdest,1000'000'000);
+        if(dest==n) ans = min(ans,dp);
+    }
+
+    cout << ans << '\n';
 
     return 0;
 }
