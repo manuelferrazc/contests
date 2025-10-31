@@ -26,18 +26,9 @@ struct line { // f(x) = ax+b
 };
 
 ll findopt(deque<line> &dq, ll x) {
-    if(dq.empty()) return 1e15;
-    if(dq.size()==1) return dq[0].val(x);
+    while(dq.size()>1ull and dq[0].val(x)<=dq[1].val(x)) dq.pop_front();
 
-    int l = 0, r=dq.size()-1;
-
-    while(l<r) {
-        int m = (l+r)/2;
-        if(dq[m].val(x)>dq[m+1].val(x)) l=m+1;
-        else r=m;
-    }
-
-    return dq[l].val(x);
+    return dq.front().val(x);
 }
 
 int main() { _
@@ -67,13 +58,13 @@ int main() { _
     n = v.size();
 
     for(int i=0;i<n;i++) {
-        line newline(v[i].ss,costlast);
+        line newline(-v[i].ss,-costlast);
         
         while(dq.size()>1ull and newline.intersect(dq[dq.size()-2])<=dq.back().intersect(dq[dq.size()-2]))
             dq.pop_back();
         dq.push_back(newline);
         
-        costlast = findopt(dq,v[i].ff);
+        costlast = -findopt(dq,v[i].ff);
     }
 
     cout << costlast << '\n';
