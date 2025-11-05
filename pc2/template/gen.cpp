@@ -10,7 +10,6 @@ typedef unsigned long long ull;
 
 
 int main(int argc, char**argv) { _
-
     srand(atoi(argv[1]));
     
 
