@@ -12,6 +12,60 @@ const char *yes = "Yes\n";
 const char *no = "No\n";
 const char *en = ""; // ????
 
+int mi[800'000],ma[800'000];
+
+void build(int pos, int l, int r, int *v) {
+    if(l==r) mi[pos] = ma[pos] = v[l];
+    else {
+        int m = (l+r)>>1;
+        int ls = 2*pos+1;
+
+        build(ls,l,m,v);
+        build(ls+1,m+1,r,v);
+
+        mi[pos] = min(mi[ls],mi[ls+1]);
+        ma[pos] = max(ma[ls],ma[ls+1]);
+    }
+}
+
+void change(int pos, int l, int r, int i) {
+    if(i<l or r<i) return;
+    else if(l==r) {
+        mi[pos] = INT_MAX;
+        ma[pos] = INT_MIN;
+    } else {
+        int m = (l+r)>>1;
+        int ls = 2*pos+1;
+
+        change(ls,l,m,i);
+        change(ls+1,m+1,r,i);
+
+        mi[pos] = min(mi[ls],mi[ls+1]);
+        ma[pos] = max(ma[ls],ma[ls+1]);
+
+    }
+}
+
+int getmi(int pos, int l, int r, int lq, int rq) {
+    if(rq<l or r<lq) return INT_MAX;
+    if(lq<=l and r<=rq) return mi[pos];
+
+    int m = (l+r)>>1;
+    int ls = 2*pos+1;
+
+    return min(getmi(ls,l,m,lq,rq),getmi(ls+1,m+1,r,lq,rq));
+}
+
+int getma(int pos, int l, int r, int lq, int rq) {
+    if(rq<l or r<lq) return INT_MIN;
+    if(lq<=l and r<=rq) return ma[pos];
+
+    int m = (l+r)>>1;
+    int ls = 2*pos+1;
+
+    return max(getma(ls,l,m,lq,rq),getma(ls+1,m+1,r,lq,rq));
+}
+
 const char * solve() {
     int n;
     cin >> n;
@@ -24,6 +78,8 @@ const char * solve() {
         pref[i] = min(pref[i-1],i[v]);
     }
 
+    build(0,0,n-1,v);
+
     suf[n-1] = v[n-1];
     for(int i=n-2;i>=0;i--) suf[i] = max(suf[i+1],i[v]);
 
@@ -33,28 +89,36 @@ const char * solve() {
 
     cout << yes;
 
-    set<int> s;
-    set<int> comp;
-    for(int i=1;i<=n;i++) s.insert(i);
+    int pos[n+1];
+    for(int i=0;i<n;i++) pos[v[i]] = i;
 
-    for(int i=0;i<n;i++) {
-        if(s.find(v[i])==s.end()) continue;
-        
-        bool ok = false;
+    queue<int> q;
+    q.push(1);
 
-        comp.insert(v[i]);
-        while(*s.rbegin()>v[i]) {
-            cout << v[i] << ' ' << *s.rbegin() << '\n';
-            comp.insert(*prev(s.end()));
-            s.erase(prev(s.end()));
-            ok = true;
+    change(0,0,n-1,pos[1]);
+    int cnt = 1;
+
+    while(cnt<n) {
+        int a = q.front();
+        q.pop();
+
+        while(pos[a]<n-1) {
+            int x = getma(0,0,n-1,pos[a]+1,n-1);
+            if(x==INT_MIN or x<a) break;
+            change(0,0,n-1,pos[x]);
+            cout << a << ' ' << x  << '\n';
+            q.push(x);
+            cnt++;
         }
 
-        if(not ok) {
-            cout << v[i] << ' ' << *comp.rbegin() << '\n';
+        while(pos[a]) {
+            int x = getmi(0,0,n-1,0,pos[a]-1);
+            if(x>a) break;
+            change(0,0,n-1,pos[x]);
+            cout << a << ' ' << x << '\n';
+            q.push(x);
+            cnt++;
         }
-
-        s.erase(v[i]);
     }
 
     return en;
