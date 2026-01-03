@@ -1,2 +1,2 @@
 CXX = g++
-CXXFLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer -g -Wall -Wshadow -std=c++23 -Wno-unused-result -Wno-sign-compare -Wno-char-subscripts #-fuse-ld=gold
+CXXFLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer -g -Wall -Wshadow -std=c++23 -O2 -Wno-unused-result -Wno-sign-compare -Wno-char-subscripts #-fuse-ld=gold

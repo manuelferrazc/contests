@@ -1,5 +1,10 @@
 #include <bits/stdc++.h>
 
+#pragma GCC optimize("Ofast")
+// Auto explicativo
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx2")
+
 using namespace std;
 
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
@@ -8,155 +13,262 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+typedef pair<priority_queue<int,vector<int>,greater<int>>,priority_queue<int>> ppp;
+
 struct pt { // ponto
 	ll x, y;
-	pt(ll x_ = 0, ll y_ = 0) : x(x_), y(y_) {}
-	bool operator < (const pt p) const {
-		if (x != p.x) return x < p.x;
-		return y < p.y;
-	}
-	bool operator == (const pt p) const {
-		return x == p.x and y == p.y;
-	}
-	pt operator + (const pt p) const { return pt(x+p.x, y+p.y); }
-	pt operator - (const pt p) const { return pt(x-p.x, y-p.y); }
-	pt operator * (const ll c) const { return pt(x*c, y*c); }
-	ll operator * (const pt p) const { return x*(ll)p.x + y*(ll)p.y; }
-	ll operator ^ (const pt p) const { return x*(ll)p.y - y*(ll)p.x; }
-	friend istream& operator >> (istream& in, pt& p) {
-		return in >> p.x >> p.y;
-	}
+	pt(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
 };
 
 struct line { // reta
 	pt p, q;
 	line() {}
 	line(pt p_, pt q_) : p(p_), q(q_) {}
-	friend istream& operator >> (istream& in, line& r) {
-		return in >> r.p >> r.q;
-	}
 };
 
-// PONTO & VETOR
-
-ll sarea2(pt p, pt q, pt r) { // 2 * area com sinal
-	return (q-p)^(r-q);
-}
-
-bool ccw(pt p, pt q, pt r) { // se p, q, r sao ccw
-	return sarea2(p, q, r) > 0;
-}
-
-// RETA
-
-bool isinseg(pt p, line r) { // se p pertence ao seg de r
-	if(r.p.x==r.q.x) 
-		return p.x==r.p.x and min(r.p.y,r.q.y)<=p.y and p.y<=max(r.p.y,r.q.y);
-	else 
-		return p.y==r.p.y and min(r.p.x,r.q.x)<=p.x and p.x<=max(r.p.x,r.q.x);
-}
-
-bool interseg(line r, line s) { // se o seg de r intersecta o seg de s
-	if (isinseg(r.p, s) or isinseg(r.q, s)
-		or isinseg(s.p, r) or isinseg(s.q, r)) return 1;
-
-	return ccw(r.p, r.q, s.p) != ccw(r.p, r.q, s.q) and
-			ccw(s.p, s.q, r.p) != ccw(s.p, s.q, r.q);
-}
-
-bool operator < (const line& a, const line& b) { // comparador pro sweepline
-	if (a.p == b.p) return ccw(a.p, a.q, b.q);
-	if (a.p.x!=a.q.x and (b.p.x == b.q.x or a.p.x < b.p.x))
-		return ccw(a.p, a.q, b.p);
-	return ccw(a.p, b.q, b.p);
-}
-
-bool has_intersection(vector<line> &v) {
-	auto intersects = [&](pair<line, int> a, pair<line, int> b) {
-		if(abs(a.ss-b.ss)==1) return false;
-		return interseg(a.first, b.first);
-	};
-	vector<pair<pt, pair<int, int>>> w;
-	for (int i = 0; i < v.size(); i++) {
-		if (v[i].q < v[i].p) swap(v[i].p, v[i].q);
-		w.push_back({v[i].p, {0, i}});
-		w.push_back({v[i].q, {1, i}});
-	}
-	sort(w.begin(), w.end());
-	set<pair<line, int>> se;
-	for (auto i : w) {
-		line at = v[i.second.second];
-		if (i.second.first == 0) {
-			auto nxt = se.lower_bound({at, i.second.second});
-			if (nxt != se.end() and intersects(*nxt, {at, i.second.second})) return 1;
-			if (nxt != se.begin() and intersects(*(--nxt), {at, i.second.second})) return 1;
-			se.insert({at, i.second.second});
-		} else {
-			auto nxt = se.upper_bound({at, i.second.second}), cur = nxt, prev = --cur;
-			if (nxt != se.end() and prev != se.begin()
-				and intersects(*nxt, *(--prev))) return 1;
-			se.erase(cur);
-		}
-	}
-	return 0;
-}
-
 int compress(vector<line> &v) {
-	set<int> s;
+	vector<ll> s2;
 	for(int i=0;i<(int)v.size();i++) {
-		s.insert(v[i].p.x);
-		s.insert(v[i].p.y);
-		s.insert(v[i].q.x);
-		s.insert(v[i].q.y);
+		s2.push_back(v[i].p.x);
+		s2.push_back(v[i].p.y);
+		s2.push_back(v[i].q.x);
+		s2.push_back(v[i].q.y);
 	}
 
-	map<int,int> m;
+	sort(s2.begin(),s2.end());
+	vector<ll> s(1,s2[0]);
+	for(ll i:s2) if(i!=s.back()) s.push_back(i);
+
+	pair<ll,int> m[s.size()];
 	int val = 0;
-	for(auto i:s) m[i] = val++;
+	for(auto i:s) {
+		m[val] = pair(i,val);
+		val++;
+	}
 
 	for(int i=0;i<(int)v.size();i++) {
-		v[i].p.x = m[v[i].p.x];
-		v[i].p.y = m[v[i].p.y];
-		v[i].q.x = m[v[i].q.x];
-		v[i].q.y = m[v[i].q.y];
+		auto it = lower_bound(m,m+val,pair(v[i].p.x,-1));
+		v[i].p.x = it->ss;
+		it = lower_bound(m,m+val,pair(v[i].p.y,-1));
+		v[i].p.y = it->ss;
+		it = lower_bound(m,m+val,pair(v[i].q.x,-1));
+		v[i].q.x = it->ss;
+		it = lower_bound(m,m+val,pair(v[i].q.y,-1));
+		v[i].q.y = it->ss;
 	}
 
 	return val;
 }
 
-inline bool vert(line &l) {
+bool vert(line &l) {
 	return l.q.x==l.p.x;
 }
+
+array<int,4> combine(array<int,4> const &a1, array<int,4> const &a2) {
+	vector<int> v;
+	for(int i=0;i<4;i++) if(a1[i]!=-1) v.push_back(a1[i]);
+	for(int i=0;i<4;i++) if(a2[i]!=-1) v.push_back(a2[i]);
+
+	if(v.size()==0) return {-1,-1,-1,-1};
+	sort(v.begin(),v.end());
+	if(v.size()==1) return {v[0],-1,v[0],-1};
+	else return {v[0],v[1],*v.rbegin(),*next(v.rbegin())};
+}
+
+int fast[100'001];
+
+void add(array<int,4> *st, ppp *s, int pos, int l, int r, int x, int i) {
+	if(l==r) {
+		s[l].ff.push(i);
+		s[l].ss.push(i);
+
+		st[pos][0] = s[l].ff.top();
+		st[pos][1] = st[pos][2] = -1;
+		st[pos][2] = s[l].ss.top();
+
+		if(s[l].ff.size()>1) {
+			int m1 = s[l].ff.top(),m2 = s[l].ss.top();
+			s[l].ff.pop();
+			s[l].ss.pop();
+
+			st[pos][1] = s[l].ff.top();
+			st[pos][3] = s[l].ss.top();
+
+			s[l].ff.push(m1);
+			s[l].ss.push(m2);
+		}
+		return;
+	}
+
+	int ls = 2*pos+1, m = (l+r)>>1;
+	if(x<=m) add(st,s,ls,l,m,x,i);
+	else add(st,s,ls+1,m+1,r,x,i);
+
+	st[pos] = combine(st[ls],st[ls+1]);
+}
+
+vector<bool> lz;
+
+void rem(array<int,4> *st, ppp *s, int pos, int l, int r, int x) {
+	if(l==r) {
+		// s[l].erase(i);
+		int ma1=-1,ma2=-1,mi1=-1,mi2=-1;
+		
+		while(s[l].ff.size() and lz[s[l].ff.top()]) s[l].ff.pop();
+		if(s[l].ff.size()) {
+			mi1 = s[l].ff.top();
+			s[l].ff.pop();
+
+			while(s[l].ff.size() and lz[s[l].ff.top()]) s[l].ff.pop();
+			if(s[l].ff.size()) mi2 = s[l].ff.top();
+
+			s[l].ff.push(mi1);
+		}
+
+		while(s[l].ss.size() and lz[s[l].ss.top()]) s[l].ss.pop();
+		if(s[l].ss.size()) {
+			ma1 = s[l].ss.top();
+			s[l].ss.pop();
+
+			while(s[l].ss.size() and lz[s[l].ss.top()]) s[l].ss.pop();
+			if(s[l].ss.size()) ma2 = s[l].ss.top();
+
+			s[l].ss.push(ma1);
+		}
+
+		st[pos] = {mi1,mi2,ma1,ma2};
+		return;
+	}
+
+	int ls = 2*pos+1, m = (l+r)>>1;
+	if(x<=m) rem(st,s,ls,l,m,x);
+	else rem(st,s,ls+1,m+1,r,x);
+
+	st[pos] = combine(st[ls],st[ls+1]);
+}
+
+void Set(int pos, int l, int r) {
+	if(l==r) fast[l] = pos;
+	else {
+		int m = (l+r)>>1,ls =2*pos+1;
+		Set(ls,l,m);
+		Set(ls+1,m+1,r);
+	}
+}
+
+array<int,4> get(array<int,4> *st, int pos, int l, int r, int lq, int rq) {
+	if(rq<l or r<lq) return {-1,-1,-1,-1};
+	if(lq<=l and r<=rq) return st[pos];
+
+	int ls = 2*pos+1, m = (l+r)>>1;
+	array<int,4> a1 = get(st,ls,l,m,lq,rq),
+				 a2 = get(st,ls+1,m+1,r,lq,rq);
+
+	return combine(a1,a2);
+}
+
 
 int find_err(vector<line> v) {
 	int r = v.size();
 
 	int mx = compress(v);
-	
-	vector<array<int,3>> ev;	for(int i=0;i<n;i++) {
-		if(vert(v[i])) ev.push_back({v[i].p.x,2,i});
+	Set(0,0,mx-1);
+
+	vector<array<int,3>> ev;
+	for(int i=0;i<r;i++) {
+		if(vert(v[i])) ev.push_back({(int)v[i].p.x,2,i});
 		else {
-			ev.push_back({min(v[i].p.x,v[i].q.x),1,i});
-			ev.push_back({max(v[i].p.x,v[i].q.x),3,i})
+			ev.push_back({(int)min(v[i].p.x,v[i].q.x),1,i});
+			ev.push_back({(int)max(v[i].p.x,v[i].q.x),3,i});
 		}
 	}
 	
 	sort(ev.begin(),ev.end());
 	
-	set<int> leaves[mx];
+	ppp *leaves = new ppp[mx];
 
-	array<int,4> st[4*mx];
+	array<int,4> *st = new array<int,4>[4*mx];
 	for(int i=0;i<4*mx;i++) st[i][0] = st[i][1] = st[i][2] = st[i][3] = -1;
 
-	
+	for(ull i=0;i<ev.size();i++) {
+		auto [val,tp,id] = ev[i];
 
-	
+		if(tp==1) {
+			array<int,4> ret = st[fast[v[id].p.y]];
+
+			if(ret[0]!=-1 and abs(id-ret[0])>1) r = min(r,max(id,ret[0]));
+			if(ret[1]!=-1 and abs(id-ret[1])>1) r = min(r,max(id,ret[1]));
+			if(ret[2]!=-1 and abs(id-ret[2])>1) r = min(r,max(id,ret[2]));
+			if(ret[3]!=-1 and abs(id-ret[3])>1) r = min(r,max(id,ret[3]));
+
+			add(st,leaves,0,0,mx-1,v[id].p.y,id);
+		} else if(tp==2) {
+			int y1 = v[id].p.y, y2 = v[id].q.y;
+			if(y1>y2) swap(y1,y2);
+
+			array<int,4> ret = get(st,0,0,mx-1,y1,y2);
+
+			if(ret[0]!=-1 and abs(id-ret[0])>1) r = min(r,max(id,ret[0]));
+			if(ret[1]!=-1 and abs(id-ret[1])>1) r = min(r,max(id,ret[1]));
+			if(ret[2]!=-1 and abs(id-ret[2])>1) r = min(r,max(id,ret[2]));
+			if(ret[3]!=-1 and abs(id-ret[3])>1) r = min(r,max(id,ret[3]));
+		} else {
+			lz[id] = true;
+			rem(st,leaves,0,0,mx-1,v[id].p.y);
+
+			array<int,4> ret = st[fast[v[id].p.y]];
+
+			if(ret[0]!=-1 and abs(id-ret[0])>1) r = min(r,max(id,ret[0]));
+			if(ret[1]!=-1 and abs(id-ret[1])>1) r = min(r,max(id,ret[1]));
+			if(ret[2]!=-1 and abs(id-ret[2])>1) r = min(r,max(id,ret[2]));
+			if(ret[3]!=-1 and abs(id-ret[3])>1) r = min(r,max(id,ret[3]));
+		}
+	}
+
+	ev.clear();
+	for(ull i=0;i<v.size();i++) {
+		if(vert(v[i])) {
+			ev.push_back({(int)min(v[i].p.y,v[i].q.y),1,(int)i});
+			ev.push_back({(int)max(v[i].p.y,v[i].q.y),2,(int)i});
+		}
+	}
+
+	sort(ev.begin(),ev.end());
+
+	for(ull i=0;i<ev.size();i++) {
+		auto [val,tp,id] = ev[i];
+
+		if(tp==1) {
+			array<int,4> ret = st[fast[v[id].p.x]];
+
+			if(ret[0]!=-1 and abs(id-ret[0])>1) r = min(r,max(id,ret[0]));
+			if(ret[1]!=-1 and abs(id-ret[1])>1) r = min(r,max(id,ret[1]));
+			if(ret[2]!=-1 and abs(id-ret[2])>1) r = min(r,max(id,ret[2]));
+			if(ret[3]!=-1 and abs(id-ret[3])>1) r = min(r,max(id,ret[3]));
+
+			add(st,leaves,0,0,mx-1,v[id].p.x,id);
+		} else {
+			lz[id] = true;
+			rem(st,leaves,0,0,mx-1,v[id].p.x);
+
+			array<int,4> ret = st[fast[v[id].p.x]];
+
+			if(ret[0]!=-1 and abs(id-ret[0])>1) r = min(r,max(id,ret[0]));
+			if(ret[1]!=-1 and abs(id-ret[1])>1) r = min(r,max(id,ret[1]));
+			if(ret[2]!=-1 and abs(id-ret[2])>1) r = min(r,max(id,ret[2]));
+			if(ret[3]!=-1 and abs(id-ret[3])>1) r = min(r,max(id,ret[3]));
+		}
+	}
+
+	delete[] leaves;
+	delete[] st;
 	return r;
 }
 
 int main() { _
 	int n;
 	cin >> n;
+	lz = vector<bool>(n,false);
 
 	ll s=0;
 	pair<char,int> v[n];
@@ -174,65 +286,28 @@ int main() { _
 			else if(v[i].ff=='R' and v[i-1].ff=='L') err = true;
 			if(err) {
 				n = i;
+				s-=v[i].ss;
 				break;
 			}			
 		}
 	}
 
-	int steps=1;
-	pt last;
-
-	{int l=1,r=n;
-
-
-	while(l<=r) {
-		int m = (l+r)>>1;
-
-		vector<line> ln;
-		pt p(0,0);
-
-		bool err = false;
-
-		for(int i=0;i<m;i++) {
-			if(i) {
-				if(v[i].ff=='U' and v[i-1].ff=='D') err = true;
-				else if(v[i].ff=='D' and v[i-1].ff=='U') err = true;
-				else if(v[i].ff=='L' and v[i-1].ff=='R') err = true;
-				else if(v[i].ff=='R' and v[i-1].ff=='L') err = true;
-				if(err) break;
-			}
-			
-			pt pa = p;
-
-			if(v[i].ff=='U') p.y+=v[i].ss;
-			else if(v[i].ff=='D') p.y-=v[i].ss;
-			else if(v[i].ff=='R') p.x+=v[i].ss;
-			else p.x-=v[i].ss;
-
-			ln.push_back(line(pa,p));
-		}
-
-		pt bk = ln.back().q;
-
-		if(err or has_intersection(ln)) r = m-1;
-		else {
-			l = m+1;
-			steps = m;
-			last = bk;
-		}
+	vector<line> v2;
+	{pt bef;
+	for(int i=0;i<n;i++) {
+		pt act = bef;
+		if(v[i].ff=='U') act.y+=v[i].ss;
+		else if(v[i].ff=='D') act.y-=v[i].ss;
+		else if(v[i].ff=='R') act.x+=v[i].ss;
+		else act.x-=v[i].ss;
+		v2.push_back(line(bef,act));
+		bef = act;
 	}}
 
+	int steps=find_err(v2);
+	pt last = v2[steps-1].q;
 
 	if(steps==n) cout << s << '\n';
-	else if((v[steps].ff=='U' and v[steps-1].ff=='D')
-		or (v[steps].ff=='D' and v[steps-1].ff=='U')
-		or (v[steps].ff=='L' and v[steps-1].ff=='R')
-		or (v[steps].ff=='R' and v[steps-1].ff=='L')
-	) {
-		s = 0;
-		for(int i=0;i<steps;i++) s+=v[i].ss;
-		cout << s << '\n';
-	}
 	else {
 		s = 0;
 		for(int i=0;i<steps;i++) s+=v[i].ss;
@@ -271,8 +346,6 @@ int main() { _
 			line l(act,bef);
 			if(l.p.x>l.q.x or l.p.y>l.q.y) swap(l.p,l.q);
 
-			// println("i = {}, pontos = ({},{}), ({},{})",i,bef.x,bef.y,act.x,act.y);
-			// println("dps de ordenar: ({},{}), ({},{})",l.p.x,l.p.y,l.q.x,l.q.y);
 			if(vert == vert2) {
 				ll a1,a2,b1,b2;
 
@@ -304,15 +377,11 @@ int main() { _
 					d = min(d,abs(last.x-l.p.x));
 				}
 			}
-
-			// cout << last.x << ' ' << last.y << '\n';
-			// cout << last2.x << ' ' << last2.y << '\n';
 		}
 		
 		
 		cout << s+d << '\n';
 	}
-	
 
 	return 0;
 }
