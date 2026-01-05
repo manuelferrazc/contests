@@ -8,38 +8,94 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-int main() { _
-    string s;
-    cin >> s;
-    s = '1' + s;
-    
-    vector<vector<vector<ull>>> dp(7,vector<vector<ull>>(7,vector<ull>(49,0)));
-    dp[0][0][0] = 1;
+bool vis[9][9];
+string s;
+int ans = 0;
 
-    // cout << dp[5][6][47] << '\n';
-    for(int t = 1;t<=48;t++) {
-        for(int x=0;x<7;x++) {
-            for(int y=0;y<7;y++) {
-                if(s[t]=='U') {
-                    if(x!=6) dp[x][y][t] += dp[x+1][y][t-1];
-                } else if(s[t]=='D') {
-                    if(x) dp[x][y][t] += dp[x-1][y][t-1];
-                } else if(s[t]=='L') {
-                    if(y!=6) dp[x][y][t] += dp[x][y+1][t-1];
-                } else if(s[t]=='R') {
-                    if(y) dp[x][y][t] += dp[x][y-1][t-1];
-                } else {
-                    if(x!=6) dp[x][y][t] += dp[x+1][y][t-1];
-                    if(x) dp[x][y][t] += dp[x-1][y][t-1];
-                    if(y!=6) dp[x][y][t] += dp[x][y+1][t-1];
-                    if(y) dp[x][y][t] += dp[x][y-1][t-1];
-                }
-            }
-        }
+void brute(int i, int j, int st, int dir) {
+    // cout << i << ' ' << j << '\n';
+    // cout << st << '\n';
+    if(i==7 and j==1) {
+        if(st==49) ans++;
+        return;
     }
-    
 
-    cout << dp[6][0][48] << '\n';
+    if(vis[i+1][j] and vis[i-1][j] and vis[i][j-1] and vis[i][j+1]) return;
+
+    vis[i][j] = true;
     
+    bool front = false, rig = false, lef = false;
+
+    if(dir==0) { // vim de cima
+        front = vis[i+1][j];
+        rig = vis[i][j+1];
+        lef = vis[i][j-1];
+
+        if(front and not (rig or lef)) {
+            vis[i][j] = false;
+            return;
+        }
+
+        if((not front) and (s[st-1]=='?' or s[st-1]=='D')) brute(i+1,j,st+1,0);
+        if((not lef) and (s[st-1]=='?' or s[st-1]=='L')) brute(i,j-1,st+1,1);
+        if((not rig) and (s[st-1]=='?' or s[st-1]=='R')) brute(i,j+1,st+1,2);
+    } else if(dir==1) { // vim da direita
+        front = vis[i][j-1];
+        lef = vis[i+1][j];
+        rig = vis[i-1][j];
+
+        if(front and not (rig or lef)) {
+            vis[i][j] = false;
+            return;
+        }
+
+        if((not front) and (s[st-1]=='?' or s[st-1]=='L')) brute(i,j-1,st+1,1);
+        if((not lef) and (s[st-1]=='?' or s[st-1]=='D')) brute(i+1,j,st+1,0);
+        if((not rig) and (s[st-1]=='?' or s[st-1]=='U')) brute(i-1,j,st+1,3);
+    } else if(dir==2) { // vim da esquerda
+        front = vis[i][j+1];
+        lef = vis[i-1][j];
+        rig = vis[i+1][j];
+
+        // cout << front << ' ' << rig << ' ' << lef << '\n';
+
+        if(front and not (rig or lef)) {
+            vis[i][j] = false;
+            return;
+        }
+
+        if((not front) and (s[st-1]=='?' or s[st-1]=='R')) brute(i,j+1,st+1,2);
+        if((not lef) and (s[st-1]=='?' or s[st-1]=='U')) brute(i-1,j,st+1,3);
+        if((not rig) and (s[st-1]=='?' or s[st-1]=='D')) brute(i+1,j,st+1,0);
+    } else { // vim de baixo
+        front = vis[i-1][j];
+        rig = vis[i][j+1];
+        lef = vis[i][j-1];
+        // cout << front << ' ' << rig << ' ' << lef << '\n';
+        if(front and not (rig or lef)) {
+            vis[i][j] = false;
+            return;
+        }
+        
+        if((not front) and (s[st-1]=='?' or s[st-1]=='U')) brute(i-1,j,st+1,3);
+        if((not lef) and (s[st-1]=='?' or s[st-1]=='L')) brute(i,j-1,st+1,1);
+        if((not rig) and (s[st-1]=='?' or s[st-1]=='R')) brute(i,j+1,st+1,2);
+    }
+
+    vis[i][j] = false;
+}
+
+int main() { _
+    for(int i=0;i<9;i++) for(int j=0;j<9;j++) vis[i][j] = i==0 or i==8 or j==0 or j==8;
+    
+    cin >> s;
+    
+    vis[1][1] = true;
+    
+    if(s[0]=='R' or s[0]=='?') brute(1,2,2,2);
+    if(s[0]=='D' or s[0]=='?') brute(2,1,2,0);
+
+    cout << ans << '\n';
+
     return 0;
 }

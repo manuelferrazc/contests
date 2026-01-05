@@ -8,20 +8,54 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+int n;
 
+bool ok(vector<int> &v, char c='#') {
+    auto it = max_element(v.begin(),v.end());
+    int mx = *it;
+    char id = (char)(it-v.begin())+'A';
+    if(n&1){
+        if(mx<=n/2) return true;
+        if(mx==n/2+1 and id!=c) return true;
+    } else if(mx<=n/2) return true;
+
+    return false;
+}
+
+
+void brute(vector<int> &v, char last='#') {
+    if(n==0) return;
+    n--;
+
+    for(int i=0;i<26;i++) {
+        char l = i+'A';
+
+        if(v[i] and l!=last) {
+            v[i]--;
+            if(ok(v,l)) {
+                cout << l;
+                return brute(v,l);
+            }
+            v[i]++;
+        }
+    }
+}
 
 int main() { _
     string s;
     cin >> s;
-    int n = s.size();
+    n = s.size();
 
-    map<char,int> m;
-    for(char c:s) m[c]++;
+    vector<int> v(26,0);
+    for(char c:s) v[c-'A']++;
 
-    for(auto it = m.begin();it!=m.end();it++) {
-    
+    if(not ok(v)) {
+        cout << -1 << '\n';
+        return 0;
     }
 
+    brute(v);
+    cout << '\n';
     
     return 0;
 }
