@@ -1,12 +1,5 @@
 #include <bits/stdc++.h>
-
-// Auto explicativo
-#pragma GCC optimize("unroll-loops")
-// Vetorizacao
-#pragma GCC target("avx2")
-// Para operacoes com bits
-#pragma GCC target("bmi,bmi2,popcnt,lzcnt")
-
+ 
 using namespace std;
  
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
@@ -15,38 +8,42 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
  
-vector<ll> v;
-vector<int> dp;
-ll x,n,count[1<<20];
- 
- 
-int ddp(int m) {
-    if(dp[m]!=INT_MAX) return dp[m];
- 
-    int sla=28;
-    for(;(m&(1<<sla))==0;sla--) {}
-    for(int i=m;i&(1<<sla);i=(i-1)&m) {
-        if(::count[i]<=x) dp[m] = min(dp[m],1+ddp(m-i));
-    }
- 
-    return dp[m];
-}
- 
 int main() { _
+    int n, x;
     cin >> n >> x;
-    v.resize(n);
-    dp.resize(1<<n,INT_MAX);
-    dp[0] = 0;
-    for(ll &i:v) cin >> i;
- 
-    for(int i=0;i<(1<<n);i++) {
-        ::count[i] = 0;
-        for(int j=0;j<n;j++) {
-            if(i&(1<<j)) ::count[i]+=v[j];
+    
+    pair<int,int> dp[1<<n];
+    int v[n];
+    for(int i=0;i<n;i++) cin >> v[i];
+
+    dp[0] = pair(0,x);
+
+    for(int i=1;i<(1<<n);i++) {
+        dp[i] = pair(INT_MAX,INT_MAX);
+
+        for(int j=0;(1<<j)<=i;j++) {
+            if(i&(1<<j)) {
+                int m = i-(1<<j);
+
+                if(dp[m].ff<dp[i].ff) {
+                    if(dp[m].ff<=dp[i].ff-2) {
+                        dp[i].ff = dp[m].ff;
+                        if(dp[m].ss+v[j]<=x) dp[i].ss = dp[m].ss+v[j];
+                        else {
+                            dp[i].ff++;
+                            dp[i].ss = v[j];
+                        }
+                    } else if(dp[m].ss+v[j]<=x) {
+                        dp[i].ff = dp[m].ff;
+                        dp[i].ss = dp[m].ss+v[j];
+                    } else dp[i].ss = min(dp[i].ss,dp[m].ss+v[j]);
+                } else if(dp[m].ff==dp[i].ff and dp[m].ss+v[j]<=x)
+                    dp[i].ss = min(dp[i].ss,dp[m].ss+v[j]);
+            }
         }
     }
- 
-    cout << ddp((1<<n)-1) << '\n';
+
+    cout << dp[(1<<n)-1].ff << '\n';
  
     return 0;
 }
