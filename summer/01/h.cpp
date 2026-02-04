@@ -3,100 +3,112 @@
 using namespace std;
 
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
-#define endl '\n'
-
-typedef long long ll;
-
-const int INF = 0x3f3f3f3f;
-const ll LINF = 0x3f3f3f3f3f3f3f3fll;
-
-
-const int MAX = 1e6+10, UPD = 3e5+10, LOG = 19;
-const int MAXS = 2*MAX + 4*UPD*LOG;
-
-namespace perseg {
-	int seg[MAXS];
-    int lazy[MAXS];
-	int rt[UPD], L[MAXS], R[MAXS], cnt, t;
-	int n;
-
-	int build(int p, int l, int r) {
-		if (l == r) return seg[p] = 0;
-		L[p] = cnt++, R[p] = cnt++;
-		int m = (l+r)/2;
-		return seg[p] = max(build(L[p], l, m), build(R[p], m+1, r));
-	}
-	void build(int n2) {
-		n = n2;
-		rt[0] = cnt++;
-		build(0, 0, n-1);
-	}
-	int query(int a, int b, int p, int l, int r) {
-		if (b < l or r < a) return -INF;
-		if (a <= l and r <= b) return lazy[p] + seg[p];
-		int m = (l+r)/2;
-		int ret = lazy[p] + max(query(a, b, L[p], l, m), query(a, b, R[p], m+1, r));
-		return ret;
-	}
-	int query(int a, int b, int tt) {
-		return query(a, b, rt[tt], 0, n-1);
-	}
-	int update(int a, int b, int x, int lp, int p, int l, int r) {
-		tie(seg[p], lazy[p], L[p], R[p]) = {seg[lp], lazy[lp], L[lp], R[lp]};
-		if (b < l or r < a) return seg[p] + lazy[p];
-		if (a <= l and r <= b) return seg[p] + (lazy[p] += x);
-
-		int m = (l+r)/2;
-		seg[p] = max(update(a, b, x, L[lp], L[p] = cnt++, l, m),
-					 update(a, b, x, R[lp], R[p] = cnt++, m+1, r));
-		lazy[p] = lazy[lp];
-		return seg[p] + lazy[p];
-	}
-	int update(int a, int b, int x, int tt=t) {
-		// assert(tt <= t);
-		update(a, b, x, rt[tt], rt[++t]=cnt++, 0, n-1);
-		return t;
-	}
-};
-
 #define ff first
 #define ss second
+typedef long long ll;
+typedef unsigned long long ull;
 
-int main() { _
-    int n,q;
-    cin >> n >> q;
+struct bit {
+    int *v;
+    int n;
+    
+    bit(int n2,int *v2=nullptr) {
+        n = n2;
+        v = new int[n+1];
+        for(int i=1;i<=n;i++) v[i] = 0;
 
-    vector<pair<int,int>> v(n);
-    for(int i=0;i<n;i++) cin >> v[i].ff >> v[i].ss;
-    sort(v.rbegin(),v.rend());
-
-    perseg::build(1000001);
-
-    map<int,int> m;
-    m[1e7] = 0;
-    for(int i=0;i<n;i++) {
-        int x = perseg::update(v[i].ff,v[i].ss,1);
-        m[v[i].ff] = x;
+        if(v2!=nullptr) {
+            for(int i=1;i<=n;i++) {
+                v[i]+=v2[i];
+                int j = i+(i&(-i));
+                if(j<=n) v[j]+=v[i];
+            }
+        }
     }
     
-    while(q--) {
-        int q2;
-        cin >> q2;
-
-        int p[q2];
-        for(int i=0;i<q2;i++) cin >> p[i];
-
-        int ans = 0;
-        int last = -1;
-
-        for(int i=0;i<q2;i++) {
-            auto it = m.upper_bound(last);
-
-            ans += perseg::query(p[i],p[i],it->ss);
-            last = p[i];
-        }
-
-        cout << ans << '\n';
+    ~bit() {
+        delete[] v;
     }
-	exit(0);
+    
+    void update(int i, int x) {
+        for(i+=1;i<=n;i+=(i&(-i))) v[i]+=x;
+    }
+
+    int pref(int i) {
+        int r = 0;
+        for(i++;i;i-=(i&(-i))) r+=v[i];
+        return r;
+    }
+
+    int query(int l, int r) {
+        return pref(r)-pref(l-1);
+    }
+};
+
+
+int main() { _
+	int n,m;
+	cin >> n >> m;
+
+	int ans[m];
+	for(int i=0;i<m;i++) ans[i] = n;
+
+	bit bt(1'000'002);
+
+	
+	/*
+	0 -> l, deve ser decrescente
+	1 -> tipo de evento
+	2 -> talvez r?
+	3 -> id da consulta
+	
+	dado um mesmo x, quero:
+	- fazer as consultas
+	- adicionar os novos intervalos
+	*/
+
+	vector<array<int,4>> ev;
+	for(int i=0;i<n;i++) {
+		int l,r;
+		cin >> l >> r;
+
+		ev.push_back({l,1,r,-1});
+	}
+
+	for(int i=0;i<m;i++) {
+		int qtd;
+		cin >> qtd;
+
+		int x;
+		cin >> x;
+		ev.push_back({0,0,x,i});
+		for(int j=1;j<qtd;j++) {
+			int x2;
+			cin >> x2;
+			ev.push_back({x,0,x2,i});
+			x = x2;
+		}
+
+		ev.push_back({x,0,1'000'001,i});
+	}
+
+	sort(ev.begin(),ev.end(),
+		[&](array<int,4> const &a, const array<int,4> &b) -> bool {
+			if(a[0]>b[0]) return true;
+			if(a[0]==b[0]) return a[1]<b[1];
+			return false;
+		}
+	);
+
+	for(auto [l,op,r,id]:ev) {
+		if(op) bt.update(r,1); // adicionar intervalo
+		else {
+			int q = bt.query(l,r-1);
+			ans[id]-=q;
+		}
+	}
+
+	for(int i=0;i<m;i++) cout << ans[i] << '\n';
+
+    return 0;
 }
