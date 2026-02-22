@@ -11,17 +11,7 @@ typedef unsigned long long ull;
 
 int main(int argc, char**argv) { _
     srand(atoi(argv[1]));
-
-    cout << 1 << '\n';
-
-    int n = 1+rand()%10;
-
-    cout << n << '\n';
-    for(int i=0;i<n;i++) cout << 1+rand()%n << ' ';
-    cout << '\n';
-
-    for(int i=0;i<n;i++) cout << 1+rand()%n << ' ';
-    cout << '\n';
+    
 
 
     return 0;
