@@ -10,61 +10,49 @@ typedef unsigned long long ull;
 
 const char * yes = "YES\n";
 const char * no  = "NO\n";
+const char * eol = "\n";
 
-void solve() {
+const char * solve() {
     int n,k;
     cin >> n >> k;
 
+    if(k<n or 2*n-1<k) return no;
+
+    queue<int> q;
+    while(k<2*n-1) {
+        q.push(n);
+        q.push(n);
+        
+        k--;
+        n--;
+    }
+
     if(n==1) {
-        if(k==1) cout << yes << 1 << ' ' << 1 << '\n';
-        else cout << no;
-        return;
+         q.push(1);
+         q.push(1);
+    } else if(n) {
+        q.push(1);
+        q.push(2);
+        for(int i=3;i<=n;i++) {
+            q.push(i);
+            q.push(i-2);
+        }
+        q.push(n-1);
+        q.push(n);
     }
 
-    list<int> ans;
-    for(int i=0;i<n;i++) ans.push_back(i);
-    auto it = ans.end();
-    it--;
-    for(int i=0;i<n;i++) ans.push_back(i);
-
-    int qtd = (n+1)/2+n;
-
-    if(k>qtd) {
-        if(n%2==0 and qtd==k-1) {
-            cout << yes;
-            for(int i=1;i<n;i++) cout << i << ' ';
-            cout << 1 << ' ' << n << ' ';
-            for(int i=2;i<=n;i++) cout << i << ' ';
-            cout << '\n';
-        } else cout << no;
-        return;
+    cout << yes;
+    while(q.size()) {
+        cout << q.front() << ' ';
+        q.pop();
     }
+    return eol;
     
-    auto i = ans.begin();
-    auto end = it;
-    it++;
-
-    while(k<qtd and i!=end) {
-        qtd--;
-        int v = *it;
-        ans.insert(i,v);
-        i++;
-        i++;
-
-        it = ans.erase(it);
-
-    }
-
-    if(k==qtd) {
-        cout << yes;
-        for(int j:ans) cout << j+1 << ' ';
-        cout << '\n';
-    } else cout << no;
 }
 
 int main() { _
     int t;
     cin >> t;
-    while(t--) solve();
+    while(t--) cout << solve();
     return 0;
 }
