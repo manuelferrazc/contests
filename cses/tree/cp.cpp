@@ -10,80 +10,82 @@ typedef unsigned long long ull;
 
 const int MAX = 200'000;
 
-namespace seg {
-	ll seg[4*MAX], lazy[4*MAX];
-	int n, *v;
-
-	ll build(int p=1, int l=0, int r=n-1) {
-		lazy[p] = 0;
-		if (l == r) return seg[p] = v[l];
-		int m = (l+r)/2;
-		return seg[p] = build(2*p, l, m) + build(2*p+1, m+1, r);
+struct rmq {
+	vector<int> v;
+	int n;
+	static const int b = 30;
+	vector<int> mask, t;
+	int op(int x, int y) {
+		return v[x]<v[y] ? x : y;
 	}
-	void build(int n2, int* v2) {
-		n = n2, v = v2;
-		build();
+	int msb(int x) {
+		return __builtin_clz(1)-__builtin_clz(x);
 	}
-	void prop(int p, int l, int r) {
-		seg[p] += lazy[p]*(r-l+1);
-		if (l != r) lazy[2*p] += lazy[p], lazy[2*p+1] += lazy[p];
-		lazy[p] = 0;
-	}
-	ll query(int a, int b, int p=1, int l=0, int r=n-1) {
-		prop(p, l, r);
-		if (a <= l and r <= b) return seg[p];
-		if (b < l or r < a) return 0;
-		int m = (l+r)/2;
-		return query(a, b, 2*p, l, m) + query(a, b, 2*p+1, m+1, r);
-	}
-	ll update(int a, int b, int x, int p=1, int l=0, int r=n-1) {
-		prop(p, l, r);
-		if (a <= l and r <= b) {
-			lazy[p] += x;
-			prop(p, l, r);
-			return seg[p];
+	rmq() {}
+	rmq(const vector<int> &_v): v(_v), n(v.size()), mask(n), t(n) {
+		for(int i=0,at=0;i<n;mask[i++] = at|=1) {
+			at = (at<<1)&((1<<b)-1);
+			while(at and op(i,i-msb(at&-at))==i) at^=at&-at;
 		}
-		if (b < l or r < a) return seg[p];
-		int m = (l+r)/2;
-		return seg[p] = update(a, b, x, 2*p, l, m) +
-			update(a, b, x, 2*p+1, m+1, r);
+		for(int i=0;i<n/b;i++) t[i] = b*i+b-1-msb(mask[b*i+b-1]);
+		for(int j=1;(1<<j)<=n/b;j++) for(int i=0;i+(1<<j)<=n/b;i++)
+			t[n/b*j+i] = op(t[n/b*(j-1)+i],t[n/b*(j-1)+i+(1<<(j-1))]);
+	}
+	int small(int r, int sz = b) {
+		return r-msb(mask[r]&((1<<sz)-1));
+	}
+	int query(int l, int r) {
+		if(r-l+1<=b) return small(r,r-l+1);
+		int ans = op(small(l+b-1),small(r));
+		int x = l/b+1, y = r/b-1;
+		if(x<=y) {
+			int j = msb(y-x+1);
+			ans = op(ans,op(t[n/b*j+x],t[n/b*j+y-(1<<j)+1]));
+		}
+		return ans;
+	}
+};
+
+namespace lca {
+	vector<int> g[MAX];
+	int v[2*MAX], pos[MAX], dep[2*MAX];
+	int t;
+	rmq RMQ;
+
+	void dfs(int i, int d=0, int p=-1) {
+		v[t] = i, pos[i] = t, dep[t++] = d;
+		for(int j:g[i]) if(j!=p) {
+			dfs(j,d+1,i);
+			v[t] = i;
+			dep[t++] = d;
+		}
+	}
+	void build(int n, int root) {
+		t=0;
+		dfs(root);
+		RMQ = rmq(vector<int>(dep,dep+2*n-1));
+	}
+	int lca(int a, int b) {
+		a = pos[a], b = pos[b];
+		return v[RMQ.query(min(a,b),max(a,b))];
 	}
 }
 
-namespace hld {
-	vector<int> g[MAX];
-	int pos[MAX], sz[MAX];
-	int peso[MAX], pai[MAX];
-	int h[MAX], v[MAX], t;
+int pr[200'000];
+int v[200'000];
 
-	void build_hld(int k, int p = -1, int f = 1) {
-		v[pos[k] = t++] = peso[k]; sz[k] = 1;
-		for (auto& i : g[k]) if (i != p) {
-			pai[i] = k;
-			h[i] = (i == g[k][0] ? h[k] : i);
-			build_hld(i, k, f); sz[k] += sz[i];
+void dfs(int u, int p) {
+	pr[u] = p;
+	for(auto w:lca::g[u]) {
+		if(w!=p) dfs(w,u);
+	}
+}
 
-			if (sz[i] > sz[g[k][0]] or g[k][0] == p) swap(i, g[k][0]);
-		}
-		if (p*f == -1) build_hld(h[k] = k, -1, t = 0);
+int dfs2(int u, int p) {
+	for(auto w:lca::g[u]) {
+		if(w!=p) v[u]+=dfs2(w,u);
 	}
-	void build(int root = 0) {
-		t = 0;
-		build_hld(root);
-		seg::build(t, v);
-	}
-	ll query_path(int a, int b) {
-		if (pos[a] < pos[b]) swap(a, b);
-
-		if (h[a] == h[b]) return seg::query(pos[b], pos[a]);
-		return seg::query(pos[h[a]], pos[a]) + query_path(pai[h[a]], b);
-	}
-	void update_path(int a, int b, int x) {
-		if (pos[a] < pos[b]) swap(a, b);
-
-		if (h[a] == h[b]) return (void)seg::update(pos[b], pos[a], x);
-		seg::update(pos[h[a]], pos[a], x); update_path(pai[h[a]], b, x);
-	}
+	return v[u];
 }
 
 int main() { _
@@ -95,21 +97,34 @@ int main() { _
         a--;
         b--;
 
-        hld::g[a].push_back(b);
-        hld::g[b].push_back(a);
+        lca::g[a].push_back(b);
+        lca::g[b].push_back(a);
     }
 
-    hld::build();
+    lca::build(n,0);
+
+	dfs(0,-1);
 
     while(m--) {
         cin >> a >> b;
         a--;
         b--;
 
-        hld::update_path(a,b,1);
-    }
+		int lc = lca::lca(a,b);
+		if(lc==b) swap(a,b);
 
-    for(int i=0;i<n;i++) cout << hld::query_path(i,i) << ' ';
+		if(lc==a) {
+			v[b]++;
+			if(pr[a]!=-1) v[pr[a]]--;
+		} else {
+			v[a]++;
+			v[b]++;
+			v[lc]--;
+			if(pr[lc]!=-1) v[pr[lc]]--;
+		}
+    }
+	dfs2(0,-1);
+    for(int i=0;i<n;i++) cout << v[i] <<' ';
     cout << '\n';
 
     return 0;
