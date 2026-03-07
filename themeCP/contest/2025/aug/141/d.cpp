@@ -8,42 +8,56 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+bool dfs(int *adj, bool *vis, int v, int d) {
+    if(vis[v]) return d>=26;
+    vis[v] = true;
+
+    if(adj[v]!=-1) {
+        // cout << v << ' ' << adj[v] << '\n';
+        return dfs(adj,vis,adj[v],d+1);
+    }
+
+    return true;
+}
+
 void solve() {
     int n;
-    cin >> n;
     string s;
-    cin >> s;
+    cin >> n >> s;
     // cout << s << '\n';
-    set<char> missing;
+    set<char> missing; // faltam mapear
     for(char c='a';c<='z';c++) missing.insert(c);
 
-    map<char,char> m;
-    vector<pair<char,char>> v;
-    for(char c:s) {
-        if(missing.empty()) break;
+    bool ap[26];
+    fill(ap,ap+26,false);
 
-        if(m.count(c)) continue;
-        // else cout << c << 'c';
-        auto it = missing.begin();
-        if(*it==c) {
-            if(it==prev(missing.end())) {
-                m[v.back().ff] = *it;
-                m[c] = v.back().ss;
-                v.push_back({c,*it});
-                swap(v.back().ss,v[v.size()-2].ss);
-                
-            } else {
-                it++;
-                m[c] = *it;
-                v.push_back({c,*it});
+    map<char,char> m;
+
+    int adj[26];
+    fill(adj,adj+26,-1);
+
+    for(int i=0;i<n;i++) {
+        if(ap[s[i]-'a']) continue;
+        else {
+            ap[s[i]-'a'] = true;
+            
+            for(char c:missing) {
+                if(c==s[i]) continue;
+                adj[s[i]-'a'] = c-'a';
+
+                bool vis[26];
+                fill(vis,vis+26,false);
+
+                if(dfs(adj,vis,s[i]-'a',0)) {
+                    missing.erase(c);
+                    m[s[i]] = c;
+                    break;
+                }
             }
-        } else {
-            m[c] = *it;
-            v.push_back({c,*it});
+            // exit(0);
         }
-        missing.erase(it);
-        // cout << 
     }
+
     for(char c:s) cout << m[c];
     cout << '\n';
 }
