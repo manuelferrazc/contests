@@ -1,4 +1,4 @@
-P=q
+P=c
 make ${P} ${P}2 gen || exit 1
 for ((i = 1; ; i++)) do
 	./gen $i > in
