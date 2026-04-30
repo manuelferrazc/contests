@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define _ ios_base::sync_with_stdio(0);cin.tie(0);
+#define ff first
+#define ss second
+typedef long long ll;
+typedef unsigned long long ull;
+
+
+
+void solve() {
+    int n;
+    cin >> n;
+    int v[n];
+    for(int i=0;i<n;i++) cin >> v[i];
+    
+    int ans=0;
+    for(int i=0;i<n;i++) {
+        int mi = v[i];
+        int ma = v[i];
+        int g = v[i];
+        for(int j=i+1;j<n;j++) {
+            mi = min(v[j],mi);
+            ma = max(v[j],ma);
+            g = gcd(g,v[j]);
+            // cout << ma << ' ' << mi << ' ' << g << '\n';
+            if(ma-mi==g) {
+                ans++;
+                // cout << i << ' ' << j << '\n';
+            }
+        }
+    }
+
+    cout << ans << '\n';
+}
+
+int main() { _
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
+}
