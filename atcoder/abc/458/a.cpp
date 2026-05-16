@@ -8,13 +8,13 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-void solve() {
-	
-}
-
 int main() { _
-	int t;
-	cin >> t;
-	while(t--) solve();
+	string s;
+	int n;
+	cin >> s >> n;
+
+	for(int i=n;i<(int)s.size()-n;i++) cout << s[i];
+	cout << '\n';
+
 	return 0;
 }
