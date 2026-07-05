@@ -8,121 +8,29 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-mt19937 rng((int) chrono::steady_clock::now().time_since_epoch().count());
-
-template<typename T> struct treap {
-	struct node {
-		node *l, *r;
-		int p, sz;
-		T val, sub, lazy;
-		bool rev;
-		node(T v) : l(NULL), r(NULL), p(rng()), sz(1), val(v), sub(v), lazy(0), rev(0) {}
-		void prop() {
-			if (lazy) {
-				val += lazy, sub += lazy*sz;
-				if (l) l->lazy += lazy;
-				if (r) r->lazy += lazy;
-			}
-			if (rev) {
-				swap(l, r);
-				if (l) l->rev ^= 1;
-				if (r) r->rev ^= 1;
-			}
-			lazy = 0, rev = 0;
-		}
-		void update() {
-			sz = 1, sub = val;
-			if (l) l->prop(), sz += l->sz, sub += l->sub;
-			if (r) r->prop(), sz += r->sz, sub += r->sub;
-		}
-	};
-
-	node* root;
-
-	treap() { root = NULL; }
-	treap(const treap& t) {
-		throw logic_error("Nao copiar a treap!");
-	}
-	~treap() {
-		vector<node*> q = {root};
-		while (q.size()) {
-			node* x = q.back(); q.pop_back();
-			if (!x) continue;
-			q.push_back(x->l), q.push_back(x->r);
-			delete x;
-		}
-	}
-
-	int size(node* x) { return x ? x->sz : 0; }
-	int size() { return size(root); }
-	void join(node* l, node* r, node*& i) { // assume que l < r
-		if (!l or !r) return void(i = l ? l : r);
-		l->prop(), r->prop();
-		if (l->p > r->p) join(l->r, r, l->r), i = l;
-		else join(l, r->l, r->l), i = r;
-		i->update();
-	}
-	void split(node* i, node*& l, node*& r, int v, int key = 0) {
-		if (!i) return void(r = l = NULL);
-		i->prop();
-		if (key + size(i->l) < v) split(i->r, i->r, r, v, key+size(i->l)+1), l = i;
-		else split(i->l, l, i->l, v, key), r = i;
-		i->update();
-	}
-	void push_back(T v) {
-		node* i = new node(v);
-		join(root, i, root);
-	}
-	T query(int l, int r) {
-		node *L, *M, *R;
-		split(root, M, R, r+1), split(M, L, M, l);
-		T ans = M->sub;
-		join(L, M, M), join(M, R, root);
-		return ans;
-	}
-	void update(int l, int r, T s) {
-		node *L, *M, *R;
-		split(root, M, R, r+1), split(M, L, M, l);
-		M->lazy += s;
-		join(L, M, M), join(M, R, root);
-	}
-	void reverse(int l, int r) {
-		node *L, *M, *R;
-		split(root, M, R, r+1), split(M, L, M, l);
-		M->rev ^= 1;
-		join(L, M, M), join(M, R, root);
-	}
-};
-
 int main() { _
 	int n;
 	string s;
 
 	cin >> n >> s;
 
-	treap<int> t;
-	for(int i=1;i<=n;i++) {
-		t.push_back(i);
-		if(s[i-1]=='o') t.reverse(0,i-1);
+	deque<int> ans;
+	bool inv = false;
+
+	for(int i=0;i<n;i++) {
+		if(s[i]=='o') {
+			if(inv) ans.push_front(i+1);
+			else ans.push_back(i+1);
+			inv = not inv;
+		} else {
+			if(inv) ans.push_front(i+1);
+			else ans.push_back(i+1);
+		}
 	}
 
-	for(int i=0;i<n;i++) cout << t.query(i,i) << ' ';
+	int step = inv ? -1 : 1;
+	for(int i= inv ? n-1 : 0 ; i!=-1 and i!=n ;i+=step) cout << ans[i] << ' ';
 	cout << '\n';
-
-	//deque<int> ans;
-	//bool inv = false;
-
-	//for(int i=0;i<n;i++) {
-	//	if(s[i]=='o') {
-	//		if(inv) ans.push_front(i+1);
-	//		else ans.push_back(i+1);
-	//		inv = not inv;
-	//	} else ans.push_back(i+1);
-	//}
-
-	//int step = inv ? -1 : 1;
-	//for(int i= inv ? n-1 : 0 ; i!=-1 and i!=n ;i+=step) cout << ans[i] << ' ';
-	//cout << '\n';
 
     return 0;
 }

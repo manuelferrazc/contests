@@ -12,23 +12,17 @@ void solve() {
 	ll x,y,k;
 	cin >> x >> y >> k;
 
-	map<pair<ll,ll>,int> yy;
-	for(ll l=y,r=y;;) {
-		yy[pair(l,r)] = yy.size();
-		//cout << l << ' ' << r << '\n';
-		if(l==0ll) break;
-		l/=k;
-		r/=k;
+	map<ll,int> yy;
+	for(ll i=y;;) {
+		yy[i] = yy.size();
+		if(i==0ll) break;
+		i/=k;
 	}
 
 	int ans = INT_MAX;
 	int qtd=0;
 	for(ll i=x;;i/=k) {
-		for(auto it = yy.begin();it!=yy.end();it++) {
-			if(it->ff.ff>i) break;
-			if(i<=it->ff.ss) ans = min(ans,qtd+it->ss);
-		}
-
+		if(yy.count(i)) ans = min(ans,qtd+yy[i]);
 		if(i==0ll) break;
 		qtd++;
 	}
