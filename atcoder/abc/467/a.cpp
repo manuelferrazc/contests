@@ -8,9 +8,15 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-
 int main() { _
+	ll h,w;
+	cin >> h >> w;
 
+	ll bsla = 25*h*h;
+	w*=10000;
 
-	return 0;
+	if(bsla<=w) cout << "Yes\n";
+	else cout << "No\n";
+
+    return 0;
 }

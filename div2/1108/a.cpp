@@ -8,9 +8,16 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+void solve() {
+	int n;
+	cin >> n;
+	for(int i=n;i;i--) cout << i << ' ';
+	cout  << '\n';
+}
 
 int main() { _
-
-
+	int t;
+	cin >> t;
+	while(t--) solve();
 	return 0;
 }

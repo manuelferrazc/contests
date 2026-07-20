@@ -8,9 +8,8 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-
 int main() { _
 
 
-	return 0;
+    return 0;
 }

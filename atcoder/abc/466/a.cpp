@@ -8,9 +8,20 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-
 int main() { _
+	int n;
+	cin >> n;
 
+	while(n--) {
+		int x;
+		cin >> x;
+		if(x>=0) {
+			cout << "No\n";
+			return 0;
+		}
+	}
 
-	return 0;
+	cout << "Yes\n";
+
+    return 0;
 }
