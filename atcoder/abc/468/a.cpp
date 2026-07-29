@@ -8,9 +8,19 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+int main() { _
+	int n;
+	cin >> n;
 
-int main(int argc, char**argv) { _
-	srand(atoi(argv[1]));
+	int v[n];
+	for(int i=0;i<n;i++) cin >> v[i];
 
-	return 0;
+	int ans=0;
+
+	for(int i=1;i<n-1;i++) 
+		if(v[i]>max(v[i-1],v[i+1])) ans++;
+
+	cout << ans << '\n';
+
+    return 0;
 }

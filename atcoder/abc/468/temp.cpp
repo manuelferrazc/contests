@@ -8,9 +8,8 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
+int main() { _
 
-int main(int argc, char**argv) { _
-	srand(atoi(argv[1]));
 
-	return 0;
+    return 0;
 }

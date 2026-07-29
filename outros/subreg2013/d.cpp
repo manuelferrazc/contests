@@ -9,13 +9,17 @@ typedef unsigned long long ull;
 
 vector<int> r,rr;
 
+void print(vector<int> &v) {
+	for(int i=0;i<v.size();i++) cout << v[i] << ' ';
+	cout << '\n';
+}
 
 vector<int> bend(vector<int> &d, int id) {
-	//cout << "init = ";
+	//cout << "id = " << id << ", init = ";
 	//print(d);
-	vector<int> ret(max(id,(int)d.size()-id));
+	vector<int> ret(max(id,(int)d.size()-id),0);
 
-	for(int i=0;i<id;i++) ret[i] = d[i];
+	for(int i=0;i<id;i++) ret[ret.size() - id + i] = d[i];
 	int ir = ((ll)ret.size())-1;
 	
 	for(int i = id;i<d.size();i++) {
@@ -28,7 +32,7 @@ vector<int> bend(vector<int> &d, int id) {
 }
 
 
-void brute(vector<int> d, int f = 0) {
+void brute(vector<int> d) {
 	if(d.size()<r.size()) return;
 	if(d.size()==r.size()) {
 		if(d==r) {
@@ -43,11 +47,11 @@ void brute(vector<int> d, int f = 0) {
 			exit(0);
 		} else return;
 	}
+	
 	//print(d);
 	for(int id=1;id<d.size();id++) brute(bend(d,id));
-	if(f) return;
-	reverse(d.begin(),d.end());
-	for(int id=1;id<d.size();id++) brute(bend(d,id),1);
+	//reverse(d.begin(),d.end());
+	//for(int id=1;id<d.size();id++) brute(bend(d,id),1);
 }
 
 int main() { _

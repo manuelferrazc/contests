@@ -8,34 +8,6 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-template<typename T> vector<int> pi(T s) {
-	vector<int> p(s.size());
-	for(int i=1,j=0;i<s.size();i++) {
-		while(j and s[j]!=s[i]) j = p[j-1];
-		if(s[j]==s[i])j++;
-		p[i]=j;
-	}
-	return p;
-}
-
-template<typename T> map<int,int> matching(vector<int> &p,T &s, T &t) {
-	map<int,int> match;
-	for(int i=0,j=0;i<t.size();i++) {
-		while(j and s[j]!=t[i]) {
-			if(not match.count(j)) match[j] = i;
-			j = p[j-1];
-		}
-		if(s[j]==t[i]) j++;
-		else if(not match.count(j)) match[j] = i;
-		if(j==s.size()) {
-			if(not match.count(j)) match[j] = i;
-			j=p[j-1];
-		}
-		if(i==t.size()-1 and not match.count(j)) match[j] = i;
-	}
-	return match;
-}
-
 int main() { _
 	int n,q;
 	cin >> n >> q;
@@ -43,16 +15,26 @@ int main() { _
 	string s;
 	cin >> s;
 
-	vector<int> p = pi(s);
+	vector<int> v(26,INT_MAX);
+	for(int i=0;i<n;i++) 
+		if(v[s[i]-'a']==INT_MAX) v[s[i]-'a'] = i;
+
+	vector<int> v2(26,INT_MAX);
+	for(int i=0;i<26;i++) 
+		for(int j=0;j<26;j++) if(i!=j) v2[i] = min(v2[i],v[j]);
 
 	while(q--) {
 		string t;
 		cin >> t;
-		map<int,int> m = matching(p,s,t);
+		int m = t.size();
 
-		print("s = {}, f = {}, rets = ",s,t);
-		for(auto [a,b] : m) print("({} {}) ",a,b);
-		println();
+		int ans = max(n,m);
+		for(int i=0;i<m;i++) {
+			if(v2[t[i]-'a']==INT_MAX) continue;
+			ans = max(ans,m-i + n-v2[t[i]-'a']);
+		}
+
+		cout << ans << '\n';
 	}
 
 	return 0;
