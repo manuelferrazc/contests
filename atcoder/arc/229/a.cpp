@@ -8,13 +8,24 @@ using namespace std;
 typedef long long ll;
 typedef unsigned long long ull;
 
-void solve() {
-	 
-}
 
 int main() { _
-	int t;
-	cin >> t;
-	while(t--) solve();
+	int x;
+	cin >> x;
+
+	string s(50,'C');
+
+	int mx = 49;
+	for(int i=0;i<mx and x>0;i++) {
+		if(mx-i<=x) {
+			x -=  mx-i;
+			mx--;
+			s[i] = 'A';
+		}
+	}
+
+	for(char c:s) cout << c << 'R';
+	cout << '\n';
+
 	return 0;
 }

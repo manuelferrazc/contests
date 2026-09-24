@@ -9,12 +9,12 @@ typedef long long ll;
 typedef unsigned long long ull;
 
 void solve() {
-	 
+    
 }
 
 int main() { _
-	int t;
-	cin >> t;
-	while(t--) solve();
-	return 0;
+    int t;
+    cin >> t;
+    while(t--) solve();
+    return 0;
 }

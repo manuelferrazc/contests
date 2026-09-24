@@ -9,7 +9,20 @@ typedef long long ll;
 typedef unsigned long long ull;
 
 void solve() {
-	 
+	int n;
+	cin >> n;
+	int ans=0;
+
+	int r0=0,r2=0;
+	for(int i=0;i<n;i++) {
+		int x;
+		cin >> x;
+		if(x&1) ans++;
+		else if(x%4==0) r0++;
+		else r2++;
+	}
+
+	cout << max({ans,r0,r2}) << '\n';
 }
 
 int main() { _
